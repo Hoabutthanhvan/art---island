@@ -58,7 +58,7 @@ Dự án Supabase **Art island** (`ngzhzezkhuvgouekeaav`) đã có đủ bảng,
 
 ## Đưa lên Vercel
 
-1. Vào https://vercel.com/new, chọn **Import Git Repository**, chọn repo `art-island`.
+1. Vào https://vercel.com/new, chọn **Import Git Repository**, chọn repo `art---island`.
 2. *Framework Preset*: **Other**. Để trống *Build Command* và *Output Directory*.
 3. Bấm **Deploy**. Mỗi lần đẩy code mới lên nhánh `main`, Vercel tự triển khai lại.
 
