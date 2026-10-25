@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="vi">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Bảng giáo viên Art Island</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: one working column per tab — Thu bài, Sổ theo dõi, Lớp & thẻ mã, Tiêu chí, Trợ lí. Island palette from the student app, calmer for a teacher's tool. Deliberately single light theme, every color explicit. */
+:root{
+  --sky:#d7effc; --sky2:#f4fbff; --card:#ffffff; --ink:#1d4e6e; --mut:#5d7f93; --line:#d8e9f2;
+  --coral:#ff7a59; --coral-d:#c2410c; --violet:#5b3df5; --violet-bg:#efeaff;
+  --t:#0b6b3a; --t-bg:#d5f5e3; --h:#1d4ed8; --h-bg:#dbeafe; --c:#8a5a00; --c-bg:#fff0c2; --bad:#b42318; --bad-bg:#fde7e4;
+  --display:"Baloo 2","Nunito","Segoe UI",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:linear-gradient(180deg,var(--sky) 0%,var(--sky2) 380px) var(--sky2);color:var(--ink);font:15px/1.5 var(--body);min-height:100%}
+.wrap{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:12px 48px;display:flex;flex-direction:column;gap:12px}
+button,input,select,textarea{font:inherit;color:var(--ink)}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--violet);outline-offset:2px}
+h1,h2,h3,h4{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.2}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font:800 22px var(--display);color:var(--coral-d)}
+.top h1{font-size:21px}
+.top .sp{flex:1}
+.who{font-size:13px;color:var(--mut);background:var(--card);border:2px solid var(--line);border-radius:999px;padding:3px 12px}
+.sel{border:2px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--card);font-weight:700}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:4px}
+nav.tabs button{border:0;background:none;border-radius:12px;padding:8px 14px;font-weight:800;white-space:nowrap;color:var(--mut)}
+nav.tabs button.on{background:var(--ink);color:#fff}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:16px;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.end{justify-content:flex-end}
+.btn{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-weight:700}
+.btn:hover{border-color:#a9cfe2}
+.btn.pri{background:var(--coral);border-color:var(--coral);color:#fff}
+.btn.vio{background:var(--violet);border-color:var(--violet);color:#fff}
+.btn.ok{background:var(--t);border-color:var(--t);color:#fff}
+.btn.danger{color:var(--bad);border-color:#f3b7ae}
+.btn:disabled{opacity:.5;cursor:default}
+.big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:110px;border-radius:18px;border:3px dashed #9ccbe3;background:var(--sky2);font:800 18px var(--display);color:var(--ink);text-align:center;padding:12px;cursor:pointer}
+.big span{font-size:34px;line-height:1}
+.big small{font:600 13px var(--body);color:var(--mut)}
+.big.solid{border-style:solid;background:var(--coral);border-color:var(--coral);color:#fff}
+.big.solid small{color:#fff}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media(max-width:760px){.g2,.g3{grid-template-columns:1fr}}
+.note{font-size:13px;color:var(--mut)}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}
+.lvT{background:var(--t-bg);color:var(--t)}.lvH{background:var(--h-bg);color:var(--h)}.lvC{background:var(--c-bg);color:var(--c)}
+.stCho{background:#eef2f5;color:#4b6575}.stAi{background:var(--violet-bg);color:var(--violet)}.stNone{background:transparent;color:#a5b9c5}
+.topics{display:flex;gap:6px;flex-wrap:wrap}
+.topics button{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:5px 10px;font-weight:800;font-size:13px}
+.topics button.on{background:var(--coral);border-color:var(--coral);color:#fff}
+.tw{overflow-x:auto;border-radius:14px;border:2px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--card)}
+th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);text-align:left;padding:8px 10px;background:var(--sky2);white-space:nowrap}
+td{padding:7px 10px;border-top:1px solid var(--line);vertical-align:middle}
+.grid td.c{text-align:center;padding:4px}
+.grid th.c{text-align:center}
+.grid td:first-child,.grid th:first-child{position:sticky;left:0;background:var(--card);z-index:1}
+.grid th:first-child{background:var(--sky2)}
+.cell{border:0;background:none;padding:4px;border-radius:8px;min-width:48px}
+.cell:hover{background:var(--sky2)}
+.nm{border:0;background:none;padding:0;font-weight:800;text-align:left;color:var(--ink);text-decoration:underline dotted #9ccbe3;text-underline-offset:3px}
+.sub{font-size:12px;color:var(--mut)}
+.thumb{width:76px;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:2px solid var(--line);background:#fff;display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.wk{border:2px solid var(--line);border-radius:14px;background:var(--card);padding:8px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.wk img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:var(--sky2)}
+.wk b{font-size:14px;line-height:1.25}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:3px 10px;font-size:13px;font-weight:700}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip.miss{border-style:dashed;color:var(--mut)}
+.qrow{display:flex;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.qrow img,.qph{width:56px;height:42px;object-fit:cover;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;flex:none}
+.qrow .grow{flex:1;min-width:0}
+.meter{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--t)}
+.empty{padding:28px 16px;text-align:center;color:var(--mut)}
+.empty b{display:block;font:700 18px var(--display);color:var(--ink);margin-bottom:4px}
+.f{display:flex;flex-direction:column;gap:10px}
+.f label{display:flex;flex-direction:column;gap:3px;font-weight:700;font-size:14px}
+textarea,.f input,.f select,input.txt{width:100%;border:2px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--sky2)}
+.modal{position:fixed;inset:0;background:#0d2b3d99;display:grid;place-items:center;padding:12px;z-index:50}
+.modal[hidden]{display:none!important}
+.sheet{background:var(--card);border-radius:20px;width:100%;max-width:1100px;max-height:94vh;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.sheet.sm{max-width:560px}
+.sh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.rv{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}
+@media(max-width:860px){.rv{grid-template-columns:1fr}}
+.frame{border-radius:14px;border:2px solid var(--line);background:#fff;overflow:hidden}
+.frame img,.frame video{display:block;width:100%;height:auto;max-height:62vh;object-fit:contain;background:#fff}
+.crit{border:2px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.crit h4{font-size:15px}
+.lvb{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.lvb button{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:6px;font-size:12px;font-weight:800;position:relative;text-align:center}
+.lvb button.on.T{background:var(--t-bg);border-color:var(--t);color:var(--t)}
+.lvb button.on.H{background:var(--h-bg);border-color:var(--h);color:var(--h)}
+.lvb button.on.C{background:var(--c-bg);border-color:var(--c);color:var(--c)}
+.lvb button .ai{position:absolute;top:-8px;right:-6px;font-size:11px;background:var(--violet);color:#fff;border-radius:99px;padding:0 6px}
+.desc{font-size:13px;color:var(--mut);min-height:1.5em}
+.aibox{background:var(--violet-bg);border-radius:12px;padding:8px 12px;font-size:14px}
+.tag{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+.tag.on{background:var(--t-bg);border-color:var(--t);color:var(--t)}
+.warn{background:var(--c-bg);color:var(--c);border-radius:12px;padding:8px 12px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--ink);color:#fff;font-weight:700;padding:10px 18px;border-radius:999px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.gate{max-width:520px;margin:12vh auto 0;text-align:center}
+.gate .ic{font-size:48px}
+.chat{display:flex;flex-direction:column;gap:10px;min-height:280px;max-height:58vh;overflow-y:auto;padding:4px}
+.msg{max-width:88%;padding:10px 14px;border-radius:16px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;background:var(--h-bg);border-bottom-right-radius:6px}
+.msg.ai{align-self:flex-start;background:#fff4de;border-bottom-left-radius:6px}
+.crow{display:grid;grid-template-columns:110px repeat(3,minmax(0,1fr));gap:6px;align-items:start}
+@media(max-width:760px){.crow{grid-template-columns:1fr}}
+.crow textarea{min-height:64px;font-size:13px;overflow:hidden;resize:none;line-height:1.45}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top"><span class="logo">🏝️ Art Island</span><h1>Bảng giáo viên</h1><span class="sp"></span><select id="clsSel" class="sel" aria-label="Chọn lớp" hidden></select><span class="who" id="who">Đang kiểm tra tài khoản…</span></header>
+  <section id="gate" class="card gate"><div class="ic">🔐</div><h2>Đang mở bảng giáo viên…</h2><p class="note">Đang kiểm tra đăng nhập…</p></section>
+  <div id="app" hidden style="display:flex;flex-direction:column;gap:12px">
+    <nav class="tabs" id="tabs" aria-label="Chức năng"></nav>
+    <main id="view"></main>
+  </div>
+</div>
+<div class="modal" id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<input type="file" id="fCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="fMany" accept="image/*" multiple hidden>
+<input type="file" id="fOne" accept="image/*" hidden>
+<input type="file" id="fVid" accept="video/*" hidden>
+<input type="file" id="fSlip" accept="image/png" multiple hidden>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/ai-common.js"></script>
+<script src="../js/sb-teacher.js"></script>
+<script>
+/* ===================== Hằng số & tiện ích ===================== */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let tT;const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2800)};
+const pref={get(k,d){try{const v=localStorage.getItem('ai5_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('ai5_'+k,JSON.stringify(v))}catch(e){}}};
+const pad2=n=>String(n).padStart(2,'0');
+const noMark=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D');
+const TOPICS=['Yếu tố tạo hình trong thực hành, sáng tạo theo chủ đề','Hình tượng anh hùng dân tộc trong mĩ thuật tạo hình Việt Nam','Gia đình','Những hoạt động yêu thích ở trường em','Những việc làm bình dị mà cao quý trong cuộc sống','Cảnh sắc quê hương','Việt Nam đất nước, con người','Vì một thế giới hoà bình'];
+const LVN={T:'Hoàn thành tốt',H:'Hoàn thành',C:'Chưa hoàn thành'},LVS={T:'HTT',H:'HT',C:'CHT'},LVK=['T','H','C'];
+const TCN=['Nhận biết','Thể hiện','Chia sẻ'],TCSUB=['Quan sát và nhận thức thẩm mĩ','Sáng tạo và ứng dụng thẩm mĩ','Phân tích và đánh giá thẩm mĩ'];
+const NOTE_TAGS=['Tự lực','Cần gợi ý','Tiến bộ rõ','Sáng tạo riêng','Hợp tác tốt','Chưa hoàn thiện'];
+/* Bộ tiêu chí mặc định — soạn từ mục tiêu từng chủ đề trong SGV Mĩ thuật 5 (bản nháp, GV sửa và duyệt trong tab Tiêu chí) */
+const CRIT0={
+1:{items:[['Gọi đúng yếu tố trọng tâm và nguyên lí đã dùng, nêu được lí do chọn.','Gọi đúng yếu tố trọng tâm trong bài của mình.','Chưa gọi được yếu tố tạo hình trong bài của mình.'],['Một yếu tố trọng tâm nổi bật rõ; vận dụng cân bằng, tương phản hoặc lặp lại hợp lí; có nét riêng.','Nhận ra được yếu tố trọng tâm; có dùng ít nhất một nguyên lí ở mức đơn giản.','Chưa có yếu tố nổi bật, các yếu tố dàn đều.'],['Giới thiệu được vẻ đẹp của yếu tố, nguyên lí trong bài mình và nhận xét được bài bạn.','Giới thiệu ngắn được bài của mình.','Chưa chia sẻ được về bài của mình.']],check:['Bài em có một chỗ nổi bật nhất, nhìn vào là thấy ngay.','Em có sắp xếp các hình: vẽ lặp lại, to cạnh nhỏ, hoặc hai bên đều nhau.','Em kể được mình đã làm chỗ nổi bật đó thế nào.']},
+2:{items:[['Phân biệt được tranh vẽ, tranh in, tượng, phù điêu; nêu được đặc điểm nhân vật anh hùng em chọn.','Nhận biết được hình thức thể hiện và nhân vật anh hùng trong bài.','Chưa nhận biết được hình thức thể hiện, nhân vật.'],['Hình tượng anh hùng rõ, nổi bật; hình thức thể hiện phù hợp; phối hợp vật liệu sáng tạo.','Thể hiện được hình tượng anh hùng nhận ra được, hình thức phù hợp.','Hình tượng anh hùng chưa rõ hoặc chưa đúng chủ đề.'],['Giới thiệu được nhân vật, cách thể hiện và bày tỏ lòng biết ơn người có công.','Giới thiệu ngắn được nhân vật em thể hiện.','Chưa giới thiệu được sản phẩm.']],check:['Nhân vật anh hùng to, rõ trong bài.','Em chọn hình thức phù hợp (vẽ, in, nặn…).','Em kể được về người anh hùng em chọn.']},
+3:{items:[['Nêu được hình ảnh, yếu tố tạo hình làm nên vẻ đẹp tranh về gia đình và trong bài mình.','Nêu được nội dung, hình ảnh chính trong bài mình.','Chưa nêu được nội dung bài mình.'],['Hình ảnh chính – phụ rõ; dùng yếu tố, nguyên lí tạo hình gợi được tình cảm gia đình; có nét riêng.','Thể hiện được nội dung Gia đình với hình ảnh chính nhận ra được.','Chưa thể hiện rõ nội dung Gia đình.'],['Chia sẻ được cảm nhận và cách dùng sản phẩm trong đời sống hằng ngày.','Giới thiệu ngắn được bài của mình.','Chưa chia sẻ được.']],check:['Hình ảnh chính về gia đình to, rõ.','Màu sắc, hình ảnh gợi tình cảm gia đình.','Em kể được khoảnh khắc em vẽ.']},
+4:{items:[['Nêu được hoạt động, hình ảnh chính – phụ, chất liệu trong bài mình.','Nêu được hoạt động em thể hiện.','Chưa nêu được nội dung bài mình.'],['Sắp xếp hình ảnh chính – phụ hợp lí; dáng hoạt động sinh động; chất liệu 2D/3D phù hợp.','Thể hiện được hoạt động ở trường, có hình ảnh chính.','Chưa thể hiện rõ hoạt động ở trường.'],['Giới thiệu được bài mình, nhận xét được bài bạn có lí do.','Giới thiệu ngắn được bài của mình.','Chưa chia sẻ được.']],check:['Có hình ảnh chính đang hoạt động.','Hình chính to, hình phụ nhỏ hơn.','Em kể được hoạt động em vẽ.']},
+5:{items:[['Nêu được việc làm bình dị mà cao quý em thể hiện và các yếu tố (chấm, nét, màu…) em dùng.','Nêu được việc làm em thể hiện.','Chưa nêu được nội dung bài mình.'],['Dùng chấm, nét, màu… rõ dấu hiệu yếu tố, nguyên lí; hình ảnh gợi được ý nghĩa việc làm.','Thể hiện được việc làm bình dị, có dùng yếu tố tạo hình đã học.','Chưa thể hiện rõ nội dung chủ đề.'],['Giới thiệu sản phẩm bằng hình thức em chọn (thuyết trình, đóng vai…) tự tin, rõ ý.','Giới thiệu ngắn được bài của mình.','Chưa giới thiệu được.']],check:['Bài em kể về một việc làm tốt.','Em dùng chấm, nét, màu rõ ràng.','Em giới thiệu được bài của mình.']},
+6:{items:[['Nêu được vẻ đẹp cảnh sắc em chọn, đối tượng và mục đích sáng tạo.','Nêu được cảnh em thể hiện.','Chưa nêu được nội dung bài mình.'],['Cảnh sắc quê hương rõ, có hình chính – phụ, gần – xa; vận dụng đa dạng yếu tố, vật liệu.','Thể hiện được cảnh sắc quê hương, có hình ảnh chính.','Chưa thể hiện rõ cảnh sắc quê hương.'],['Trao đổi, chia sẻ được kinh nghiệm thực hành và cảm nhận về cảnh đẹp.','Giới thiệu ngắn được bài của mình.','Chưa chia sẻ được.']],check:['Có một cảnh đẹp quê hương rõ ràng.','Vật gần to rõ, vật xa nhỏ nhạt.','Em kể được cảnh đẹp em chọn.']},
+7:{items:[['Chỉ ra được yếu tố chính – phụ trong bài mình và nêu ý tưởng từ trải nghiệm thực tế.','Chỉ ra được hình ảnh chính trong bài.','Chưa chỉ ra được hình ảnh chính.'],['Chính – phụ rõ; vận dụng cân bằng, tương phản, lặp lại hợp lí; thể hiện vẻ đẹp Việt Nam.','Có hình ảnh chính – phụ, thể hiện được chủ đề.','Chưa rõ chính – phụ, chưa đúng chủ đề.'],['Giới thiệu được vẻ đẹp đất nước, con người qua bài mình với niềm tự hào.','Giới thiệu ngắn được bài của mình.','Chưa chia sẻ được.']],check:['Hình ảnh chính nổi bật hơn hình phụ.','Em dùng cân bằng, tương phản hoặc lặp lại.','Em kể được vẻ đẹp Việt Nam trong bài.']},
+8:{items:[['Mô tả được yếu tố tạo hình trong bài mình; dùng tư liệu, hình ảnh hiệu quả.','Nêu được nội dung, hình ảnh chính của bài.','Chưa nêu được nội dung bài mình.'],['Hình thức thực hành phù hợp; hình ảnh về hoà bình rõ, giàu ý nghĩa; có nét riêng.','Thể hiện được chủ đề hoà bình với hình ảnh chính nhận ra được.','Chưa thể hiện rõ chủ đề hoà bình.'],['Chia sẻ được điều học hỏi khi trưng bày, thảo luận; nhận xét bài bạn có lí do.','Giới thiệu ngắn được bài của mình.','Chưa chia sẻ được.']],check:['Bài em có hình ảnh về hoà bình.','Em chọn hình thức thể hiện phù hợp.','Em kể được điều em muốn nhắn gửi.']}};
+
+/* Thư viện chỉ tải khi cần: tạo QR + PDF lúc in thẻ, đọc QR lúc thu bài */
+const LIB={qr:'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js',jsqr:'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js',pdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'},libP={};
+const needLib=k=>libP[k]||(libP[k]=new Promise(r=>{const e=document.createElement('script');e.src=LIB[k];e.onload=()=>r(true);e.onerror=()=>{libP[k]=null;r(false)};document.head.appendChild(e)}));
+const pause=()=>new Promise(r=>setTimeout(r,0));
+/* ===================== Trạng thái ===================== */
+let db=null,user=null,assets=null,dl=null,smp=null,mcp=null,imgMax=0;
+let CLASSES=[],STUDENTS=[],WORKS=[],INBOX=[],CRIT={},HK={};
+let curC=pref.get('cls',''),curT=pref.get('topic',1),tab=(t=>['thu','so','lop','tc'].includes(t)?t:'thu')(pref.get('tab','thu')),bookT=pref.get('bookT',0),bookQ='';
+const QUEUE=[];/* nhật kí thu bài phiên này */
+const modal=$('#modal'),sheet=$('#sheet');
+const openM=(h,sm)=>{sheet.className='sheet'+(sm?' sm':'');sheet.innerHTML=h;modal.hidden=false};
+const closeM=()=>{try{clearInterval(tlTimer)}catch(e){}modal.hidden=true;sheet.innerHTML='';onClose&&onClose();onClose=null;if(held){held=false;render()}};let onClose=null;
+modal.addEventListener('click',e=>{if(e.target===modal)closeM()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeM()});
+const crit=t=>{const c=CRIT['cd'+t];return c&&Array.isArray(c.items)&&c.items.length===3?c:{...CRIT0[t],draft:true}};
+const roster=()=>STUDENTS.filter(s=>s.cid===curC).sort((a,b)=>a.stt-b.stt);
+const stu=sid=>STUDENTS.find(s=>s.sid===sid);
+const wid=(cid,t,sid)=>`${cid}~${t}~${sid}`;
+const workOf=(sid,t)=>WORKS.find(w=>w.sid===sid&&w.t===t);
+const img=id=>id?AIGV.url(id):'';
+const lvPill=l=>l?`<span class="pill lv${l}">${LVS[l]}</span>`:'';
+const stPill=w=>!w?'<span class="pill stNone">·</span>':w.status==='duyet'&&w.grade?lvPill(w.grade.overall):w.status==='ai'?'<span class="pill stAi">✨ AI</span>':'<span class="pill stCho">⏳</span>';
+
+function gate(icon,title,msg){$('#gate').innerHTML=`<div class="ic">${icon}</div><h2>${title}</h2><p class="note">${msg}</p>`}
+
+/* ===================== Khởi động ===================== */
+(async function boot(){
+  if(!window.claude||!claude.use){gate('🔐','Mở trang trong Claude','Hãy mở đường link này khi đã đăng nhập tài khoản Claude của thầy cô.');$('#who').textContent='Chưa đăng nhập';return}
+  [db,user,assets,dl,smp,mcp]=await Promise.all(['db','user','assets','downloads','sample','mcp'].map(n=>claude.use(n).catch(()=>null)));
+  const edit=user?await user.canEdit().catch(()=>false):false;
+  if(!user||!db||!edit){gate('🚫','Trang này chỉ dành cho giáo viên','Tài khoản đang mở trang không có quyền xem bảng giáo viên. Học sinh hãy quay lại trang Art Island nhé.');$('#who').textContent='Không có quyền';return}
+  try{const me=await user.me();$('#who').textContent='👩‍🏫 '+(me.name||'Giáo viên')}catch(e){$('#who').textContent='👩‍🏫 Giáo viên'}
+  if(smp){try{const l=await smp.limits();imgMax=l&&l.images?Math.min(5,l.images.maxCount||1):0}catch(e){imgMax=0}}
+  $('#gate').hidden=true;$('#app').hidden=false;
+  const sig={};const sub=(col,fn)=>db.collection(col).onSnapshot(s=>{const v=s.docs.map(d=>d.data()),k=JSON.stringify(v);if(sig[col]===k)return;sig[col]=k;fn(v);render()},e=>toast('Mất kết nối dữ liệu ('+e.code+'). Tải lại trang để thử lại.'));
+  sub('classes',v=>{CLASSES=v.sort((a,b)=>a.cid.localeCompare(b.cid));if(!CLASSES.some(c=>c.cid===curC))curC=CLASSES[0]?CLASSES[0].cid:''});
+  sub('students',v=>STUDENTS=v);sub('works',v=>WORKS=v);sub('inbox',v=>INBOX=v);
+  sub('criteria',v=>{CRIT={};v.forEach(c=>CRIT[c.id]=c)});sub('hk',v=>{HK={};v.forEach(h=>HK[h.sid]=h)});
+  render();
+})();
+
+const TABS=[['thu','📷 Thu bài'],['so','📒 Sổ theo dõi'],['lop','👥 Lớp & thẻ mã'],['tc','🎯 Tiêu chí']];
+let rT=0,lastTab='',held=false;
+function render(force){cancelAnimationFrame(rT);rT=requestAnimationFrame(()=>{
+  if(!force&&!modal.hidden){held=true;return}
+  const a=document.activeElement,typing=a&&$('#view').contains(a)&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&a.type==='text'));
+  if(!force&&typing&&lastTab===tab){if(!held){held=true;a.addEventListener('blur',()=>{held=false;render()},{once:true})}return}
+  lastTab=tab;renderNow()})}
+function renderNow(){
+  const cs=$('#clsSel');cs.hidden=!CLASSES.length;
+  cs.innerHTML=CLASSES.map(c=>`<option value="${esc(c.cid)}" ${c.cid===curC?'selected':''}>Lớp ${esc(c.cid)}</option>`).join('');
+  $('#tabs').innerHTML=TABS.map(t=>`<button data-t="${t[0]}" class="${tab===t[0]?'on':''}">${t[1]}</button>`).join('');
+  $$('#tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;pref.set('tab',tab);render(true)});
+  const V={thu:vThu,so:vSo,lop:vLop,tc:vTc}[tab]||vThu;
+  if(!CLASSES.length&&tab!=='tc'){$('#view').innerHTML=`<div class="card empty"><b>Bắt đầu bằng việc tạo lớp</b>Nhập danh sách học sinh một lần, in thẻ mã, rồi thu bài cuối mỗi chủ đề.<div class="row" style="justify-content:center;margin-top:12px"><button class="btn pri" id="goLop">👥 Tạo lớp đầu tiên</button></div></div>`;$('#goLop').onclick=()=>{tab='lop';render()};if(tab==='lop')vLop();return}
+  V();
+}
+$('#clsSel').onchange=e=>{curC=e.target.value;pref.set('cls',curC);render(true)};
+function topicBar(cur,onPick,withAll){return `<div class="topics">${withAll?`<button data-tp="0" class="${cur===0?'on':''}">Tất cả</button>`:''}${TOPICS.map((n,i)=>`<button data-tp="${i+1}" class="${cur===i+1?'on':''}" title="${esc(n)}">CĐ ${i+1}</button>`).join('')}</div>`}
+function bindTopics(fn){$$('[data-tp]').forEach(b=>b.onclick=()=>fn(+b.dataset.tp))}
+
+/* ===================== Tab: Lớp & thẻ mã ===================== */
+function vLop(){
+  const R=roster(),c=CLASSES.find(x=>x.cid===curC);
+  $('#view').innerHTML=`<div class="g2">
+   <section class="card f"><h3>${c?'Lớp '+esc(c.cid):'Tạo lớp'}</h3>
+    ${c?`<p class="note" style="margin:0">Năm học ${esc(c.year||'')} · ${R.length} học sinh. Mỗi em có một mã cố định dùng cả năm.</p>`:''}
+    <form id="fCls" class="row"><input class="txt" id="nCls" placeholder="Tên lớp mới, VD: 5A1" maxlength="12" style="flex:1;min-width:140px"><input class="txt" id="nYear" placeholder="Năm học" value="2025-2026" style="width:130px"><button class="btn pri" type="submit">+ Tạo lớp</button></form>
+    <label>Thêm học sinh vào lớp ${esc(curC)} <span class="note">(mỗi dòng một họ tên, theo thứ tự danh sách lớp)</span><textarea id="names" rows="6" placeholder="Nguyễn Minh Anh&#10;Trần Gia Bảo&#10;…" ${c?'':'disabled'}></textarea></label>
+    <div class="row end"><button class="btn vio" id="addNames" ${c?'':'disabled'}>Thêm vào danh sách</button></div>
+   </section>
+   <section class="card f"><h3>Thẻ mã học sinh</h3>
+    <p class="note" style="margin:0">In <b>một lần</b>, ép plastic, dùng cả năm. Khi thu bài, em đặt thẻ cạnh sản phẩm; hệ thống đọc mã và xếp ảnh vào hồ sơ của em.</p>
+    ${qrFail?'<div class="warn">Chưa tải được thư viện tạo mã QR. Thẻ chỉ có mã số in to; khi thu bài, AI sẽ đọc mã số này.</div>':''}
+    <div class="row"><button class="btn pri" id="pdf" ${R.length?'':'disabled'}>⬇️ Tải thẻ cả lớp (PDF, A4)</button><button class="btn" id="pinPdf" ${R.length?'':'disabled'}>🔑 Tải phiếu PIN đăng nhập</button></div><p class="note" style="margin:0">Phiếu PIN dùng để em đăng nhập trang <b>nộp bài</b>. Phát riêng cho từng em, <b>không dán lên thẻ mã</b> (thẻ mã hay nằm trong ảnh chụp bài).</p><div class="row" hidden></div>
+    <p class="note" style="margin:0">Mất thẻ: bấm 🖨️ cạnh tên em để tải lại riêng thẻ của em; mã không đổi nên hồ sơ không ảnh hưởng.</p>
+   </section></div>
+   <section class="card" style="margin-top:12px;padding:0;overflow:hidden">${R.length?`<div class="tw" style="border:0;border-radius:0"><table><thead><tr><th>STT</th><th>Họ và tên</th><th>Mã</th><th>PIN</th><th>Bài đã thu</th><th></th></tr></thead><tbody>${R.map(s=>`<tr><td>${s.stt}</td><td><input class="txt" data-nm="${esc(s.sid)}" value="${esc(s.name)}" style="min-width:180px"></td><td><code>${esc(s.sid)}</code></td><td><code>${esc(s.pin||'…')}</code> <button class="btn" data-pin="${esc(s.sid)}" title="Cấp PIN mới cho em">🔑</button></td><td>${WORKS.filter(w=>w.sid===s.sid).length}/8</td><td><div class="row"><button class="btn" data-card="${esc(s.sid)}" title="Tải lại thẻ">🖨️</button><button class="btn danger" data-del="${esc(s.sid)}" title="Xoá khỏi lớp">✕</button></div></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty"><b>Lớp chưa có học sinh</b>Dán danh sách họ tên vào ô bên trái.</div>`}</section>`;
+  $('#fCls').onsubmit=async e=>{e.preventDefault();const id=noMark($('#nCls').value).toUpperCase().replace(/[^A-Z0-9]/g,'');if(!id)return toast('Tên lớp chỉ gồm chữ và số, VD: 5A1.');if(CLASSES.some(c=>c.cid===id))return toast('Lớp '+id+' đã có.');
+    try{await db.doc('classes/'+id).set({cid:id,year:$('#nYear').value.trim(),at:Date.now()});curC=id;pref.set('cls',id);$('#nCls').value='';document.activeElement&&document.activeElement.blur();render(true);toast('Đã tạo lớp '+id+'. Giờ dán danh sách học sinh.')}catch(err){toast('Chưa tạo được lớp ('+err.code+').')}};
+  const an=$('#addNames');if(an)an.onclick=async()=>{const L=$('#names').value.split('\n').map(x=>x.replace(/^\s*\d+[.)\s-]*/,'').trim()).filter(Boolean);if(!L.length)return toast('Dán danh sách họ tên trước nhé.');
+    an.disabled=true;let n=R.reduce((m,s)=>Math.max(m,s.stt),0);
+    try{for(const name of L){n++;const sid=curC+'-'+pad2(n);await db.doc('students/'+sid).set({sid,cid:curC,stt:n,name:name.slice(0,60)})}toast('Đã thêm '+L.length+' học sinh.');$('#names').value=''}catch(err){toast('Có lỗi khi thêm ('+err.code+').')}an.disabled=false};
+  $$('[data-nm]').forEach(i=>i.onchange=async()=>{const v=i.value.trim();if(!v)return;try{await db.doc('students/'+i.dataset.nm).update({name:v.slice(0,60)});toast('Đã sửa tên.')}catch(err){toast('Chưa lưu được ('+err.code+').')}});
+  $$('[data-del]').forEach(b=>b.onclick=()=>{const s=stu(b.dataset.del);if(WORKS.some(w=>w.sid===s.sid))return toast('Em '+s.name+' đã có bài trong sổ nên không xoá được.');
+    confirmM('Xoá '+s.name+' khỏi lớp '+curC+'?','Mã '+s.sid+' sẽ không dùng lại.',async()=>{try{await db.doc('students/'+s.sid).delete();toast('Đã xoá.')}catch(err){toast('Chưa xoá được ('+err.code+').')}})});
+  $('#pdf').onclick=()=>cardsFile(R,'TheMa_'+curC);$('#pinPdf').onclick=()=>pinSlips(curC);$$('[data-pin]').forEach(b=>b.onclick=()=>{const st=stu(b.dataset.pin);confirmM('Cấp mã PIN mới cho '+st.name+'?','PIN cũ sẽ không dùng được nữa.',async()=>{try{const r=await AIGV.resetPin(st.sid);toast('PIN mới của '+st.name+': '+((r&&r.pins&&r.pins[st.sid])||'…'))}catch(err){toast('Chưa cấp được PIN: '+(err.message||err.code))}})});
+  $$('[data-card]').forEach(b=>b.onclick=()=>cardsFile([stu(b.dataset.card)],'TheMa_'+b.dataset.card));
+}
+function confirmM(title,msg,ok){openM(`<h3>${esc(title)}</h3><p class="note" style="margin:0">${esc(msg)}</p><div class="row end"><button class="btn" id="cn">Không</button><button class="btn danger" id="cy">Đồng ý</button></div>`,1);$('#cn').onclick=closeM;$('#cy').onclick=()=>{closeM();ok()}}
+
+/* ---- Thẻ mã: vẽ trên canvas, xuất PDF (hoặc PNG nếu thiếu thư viện) ---- */
+const QRP='AI5:';
+function drawCard(x,s,X,Y,W,H){
+  x.save();x.translate(X,Y);x.fillStyle='#fff';x.fillRect(0,0,W,H);x.setLineDash([10,8]);x.strokeStyle='#9aa9b3';x.lineWidth=2;x.strokeRect(1,1,W-2,H-2);x.setLineDash([]);
+  x.fillStyle='#ff7a59';x.fillRect(0,0,W,46);x.fillStyle='#fff';x.font='800 24px "Baloo 2",Nunito,sans-serif';x.textAlign='center';x.fillText('ART ISLAND · MĨ THUẬT 5',W/2,32);
+  const q=210,qx=(W-q)/2,qy=62;
+  if(window.qrcode){const qr=qrcode(0,'M');qr.addData(QRP+s.sid);qr.make();const n=qr.getModuleCount(),m=q/(n+4);x.fillStyle='#000';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(qr.isDark(r,c))x.fillRect(Math.floor(qx+(c+2)*m),Math.floor(qy+(r+2)*m),Math.ceil(m),Math.ceil(m))}
+  else{x.strokeStyle='#1d4e6e';x.lineWidth=4;x.strokeRect(qx,qy,q,q);x.font='700 20px Nunito,sans-serif';x.fillStyle='#1d4e6e';x.fillText('Mã số',W/2,qy+q/2)}
+  x.fillStyle='#000';x.font='800 64px "Baloo 2",Nunito,sans-serif';x.fillText(s.sid,W/2,qy+q+66);
+  x.font='700 26px Nunito,sans-serif';let nm=s.name;while(x.measureText(nm).width>W-30&&nm.length>2)nm=nm.slice(0,-1);x.fillText(nm===s.name?nm:nm+'…',W/2,qy+q+104);
+  x.font='600 17px Nunito,sans-serif';x.fillStyle='#555';x.fillText('Đặt thẻ cạnh sản phẩm khi chụp',W/2,H-18);x.restore()}
+let qrFail=false;
+/* Phiếu PIN đăng nhập trang nộp bài (mỗi trang A4: 2 cột × 6 phiếu) */
+async function pinSlips(cid){
+  if(!dl)return toast('Chế độ xem này không tải file được.');
+  toast('Đang chuẩn bị mã PIN…');
+  try{await AIGV.ensureAccounts(cid)}catch(err){return toast('Chưa tạo được tài khoản học sinh: '+(err.message||err.code))}
+  const fresh=(await db.collection('students').get()).docs.map(d=>d.data()).filter(s=>s.cid===cid).sort((a,b)=>a.stt-b.stt);
+  if(!fresh.length)return toast('Lớp chưa có học sinh.');
+  await needLib('pdf');
+  const PW=1240,PH=1754,cols=2,rows=6,W=560,H=250,mx=(PW-cols*W)/(cols+1),my=(PH-rows*H)/(rows+1),per=cols*rows,pages=[],site=location.origin+'/nop';
+  for(let p=0;p<fresh.length;p+=per){const c=document.createElement('canvas');c.width=PW;c.height=PH;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,PW,PH);
+    fresh.slice(p,p+per).forEach((s,i)=>{const X=mx+(i%cols)*(W+mx),Y=my+Math.floor(i/cols)*(H+my);x.save();x.translate(X,Y);
+      x.setLineDash([10,8]);x.strokeStyle='#9aa9b3';x.lineWidth=2;x.strokeRect(1,1,W-2,H-2);x.setLineDash([]);
+      x.fillStyle='#1d4e6e';x.fillRect(0,0,W,44);x.fillStyle='#fff';x.font='800 22px "Baloo 2",Nunito,sans-serif';x.textAlign='center';x.fillText('ART ISLAND · ĐĂNG NHẬP NỘP BÀI',W/2,30);
+      x.fillStyle='#000';x.textAlign='left';x.font='700 26px Nunito,sans-serif';let nm=s.name;while(x.measureText(nm).width>W-40&&nm.length>2)nm=nm.slice(0,-1);x.fillText(nm,20,86);
+      x.font='600 22px Nunito,sans-serif';x.fillText('Mã số:',20,130);x.fillText('Mã PIN:',20,180);
+      x.font='800 40px "Baloo 2",Nunito,sans-serif';x.fillText(s.sid,150,132);x.fillText((s.pin||'······').split('').join(' '),150,184);
+      x.font='600 17px Nunito,sans-serif';x.fillStyle='#555';let st='Vào: '+site;while(x.measureText(st).width>W-40&&st.length>8)st=st.slice(0,-1);x.fillText(st,20,H-38);x.fillText('Giữ kín mã PIN, không đưa cho bạn khác.',20,H-14);x.restore()});pages.push(c)}
+  try{if(window.jspdf&&window.jspdf.jsPDF){const pdf=new jspdf.jsPDF({unit:'mm',format:'a4'});pages.forEach((c,i)=>{if(i)pdf.addPage();pdf.addImage(c.toDataURL('image/png'),'PNG',0,0,210,297)});await dl.save({filename:'PhieuPIN_'+cid+'.pdf',data:pdf.output('blob')})}
+    else{for(let i=0;i<pages.length;i++){const b=await new Promise(r=>pages[i].toBlob(r,'image/png'));await dl.save({filename:'PhieuPIN_'+cid+(pages.length>1?'_trang'+(i+1):'')+'.png',data:b})}}
+    toast('Đã tải phiếu PIN.')}catch(e){toast('Chưa tải được ('+(e&&e.code||'lỗi')+').')}}
+async function cardsFile(list,base){
+  if(!dl)return toast('Chế độ xem này không tải file được.');
+  toast('Đang chuẩn bị thẻ…');const [okQ]=await Promise.all([needLib('qr'),needLib('pdf')]);if(!okQ&&!qrFail){qrFail=true;render(true)}
+  const PW=1240,PH=1754,cols=3,rows=4,W=380,H=410,mx=(PW-cols*W)/(cols+1),my=(PH-rows*H)/(rows+1),per=cols*rows,pages=[];
+  for(let p=0;p<list.length;p+=per){const c=document.createElement('canvas');c.width=PW;c.height=PH;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,PW,PH);
+    list.slice(p,p+per).forEach((s,i)=>drawCard(x,s,mx+(i%cols)*(W+mx),my+Math.floor(i/cols)*(H+my),W,H));pages.push(c)}
+  try{
+    if(window.jspdf&&window.jspdf.jsPDF){const pdf=new jspdf.jsPDF({unit:'mm',format:'a4'});pages.forEach((c,i)=>{if(i)pdf.addPage();pdf.addImage(c.toDataURL('image/png'),'PNG',0,0,210,297)});await dl.save({filename:base+'.pdf',data:pdf.output('blob')})}
+    else{for(let i=0;i<pages.length;i++){const b=await new Promise(r=>pages[i].toBlob(r,'image/png'));await dl.save({filename:base+(pages.length>1?'_trang'+(i+1):'')+'.png',data:b})}}
+    toast('Đã tải thẻ mã.')}catch(e){if(e&&e.code!=='declined')toast('Chưa tải được ('+(e&&e.code||'lỗi')+').')}}
+
+/* ===================== Tab: Thu bài ===================== */
+function vThu(){
+  const R=roster(),got=R.filter(s=>workOf(s.sid,curT)),miss=R.filter(s=>!workOf(s.sid,curT)),inb=INBOX.filter(i=>i.cid===curC&&i.t===curT).sort((a,b)=>a.at-b.at);
+  $('#view').innerHTML=`<section class="card f"><div class="sh"><h3>Thu bài cuối chủ đề · Lớp ${esc(curC)}</h3><span class="note">Chỉ thu sản phẩm hoàn thiện, mỗi em một ảnh</span><button class="btn" id="bAnn">📣 Gửi thông báo</button></div>
+    ${topicBar(curT)}<p class="note" style="margin:0"><b>Chủ đề ${curT}:</b> ${esc(TOPICS[curT-1])}</p>
+    <div class="g2"><button class="big solid" id="bCam"><span>📷</span>Chụp từng bài<small>Đặt thẻ mã cạnh sản phẩm, chụp rõ cả hai</small></button><button class="big" id="bMany"><span>🖼️</span>Tải nhiều ảnh một lúc<small>Chụp bằng máy ảnh của điện thoại trước, rồi chọn cả loạt</small></button></div>
+    <button class="big solid" id="bDrv" style="min-height:76px"><span>☁️</span>Nhận bài nộp online<small id="drvNote">Bài học sinh gửi qua trang nộp bài. Mọi lớp, mọi chủ đề</small></button>
+    <button class="big" id="bSlip" style="min-height:76px"><span>📥</span>Nhập phiếu nộp bài từ nhà<small>Phiếu ảnh (.png) học sinh gửi qua Zalo, Messenger, Drive. Chọn được nhiều phiếu, mọi chủ đề</small></button>
+    <div><div class="row" style="justify-content:space-between"><b>Đã thu ${got.length}/${R.length} em</b><span class="note">${inb.length?inb.length+' ảnh chờ gán tên':''}</span></div><div class="meter" style="margin-top:6px"><i style="width:${R.length?got.length/R.length*100:0}%"></i></div></div>
+    ${miss.length?`<div><span class="note">Chưa có bài:</span><div class="chips" style="margin-top:4px">${miss.map(s=>`<button class="chip miss" data-one="${esc(s.sid)}" title="Tải ảnh riêng cho em này">${s.stt}. ${esc(s.name)}</button>`).join('')}</div></div>`:R.length?'<div class="note">✔ Cả lớp đã có bài cho chủ đề này.</div>':''}
+  </section>
+  ${inb.length?`<section class="card f" style="margin-top:12px"><h3>Ảnh chưa nhận diện (${inb.length})</h3><p class="note" style="margin:0">Ảnh chụp không đọc được thẻ mã, hoặc bài nộp online ghi mã số / lớp không khớp danh sách lớp. Bấm vào ảnh để xem bài và chọn tên (chọn nhiều em nếu là bài nhóm).</p><div class="cards">${inb.map(i=>`<button class="wk" data-inb="${esc(i.id)}"><img src="${th(i)}" alt="" loading="lazy"><span class="note">${i.meta?esc(i.meta):'Chạm để gán tên'}${i.extra&&i.extra.vidUrl?' · 🎬 có video':''}</span></button>`).join('')}</div></section>`:''}
+  <section class="card" id="qlog" style="margin-top:12px" hidden></section>`;
+  qDraw();
+  bindTopics(t=>{curT=t;pref.set('topic',t);render(true)});
+  $('#bCam').onclick=()=>{if(!R.length)return toast('Lớp chưa có học sinh.');$('#fCam').click()};
+  $('#bMany').onclick=()=>{if(!R.length)return toast('Lớp chưa có học sinh.');$('#fMany').click()};
+  $$('[data-one]').forEach(b=>b.onclick=()=>{oneSid=b.dataset.one;$('#fOne').click()});
+  $('#bSlip').onclick=()=>$('#fSlip').click();
+  $('#bDrv').onclick=()=>syncDrive();drvNote();$('#bAnn').onclick=announce;
+  $$('[data-inb]').forEach(b=>b.onclick=()=>assignInbox(INBOX.find(i=>i.id===b.dataset.inb)));
+}
+let oneSid=null;
+$('#fCam').onchange=e=>{const f=[...e.target.files];e.target.value='';handleFiles(f)};
+$('#fMany').onchange=e=>{const f=[...e.target.files];e.target.value='';handleFiles(f)};
+$('#fOne').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f||!oneSid)return;const sid=oneSid;oneSid=null;try{const b=await loadImg(f);const u=await upPair(b);b.close&&b.close();await saveWork(sid,curT,u.imgId,[sid],null,{thumbId:u.thumbId});toast('Đã lưu bài của '+stu(sid).name+'.')}catch(err){toast('Chưa lưu được ('+(err.code||'lỗi')+').')}};
+
+async function loadImg(f){try{return await createImageBitmap(f,{imageOrientation:'from-image'})}catch(e){return await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(f)})}}
+function toCanvas(b,max){const w=b.width,h=b.height,k=Math.min(1,max/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return c}
+async function compress(b){const c=toCanvas(b,1600);return await new Promise(r=>c.toBlob(r,'image/jpeg',.82))}
+async function thumbOf(b){const c=toCanvas(b,360);return {blob:await new Promise(r=>c.toBlob(r,'image/jpeg',.7)),url:c.toDataURL('image/jpeg',.6)}}
+async function upPair(b){const j=await compress(b),t=await thumbOf(b),up=await assets.upload(j,{type:'image/jpeg'}),ut=await assets.upload(t.blob,{type:'image/jpeg'});return {imgId:up.id,thumbId:ut.id,url:t.url}}
+const th=w=>img(w.thumbId||w.imgId);
+/* Đọc mọi mã QR trong ảnh: BarcodeDetector (nếu trình duyệt có) → jsQR quét lặp, che mã đã đọc */
+async function findCodes(b){
+  const out=new Set();
+  if('BarcodeDetector' in window){try{const d=new BarcodeDetector({formats:['qr_code']});(await d.detect(b)).forEach(r=>out.add(r.rawValue))}catch(e){}}
+  if(!out.size&&window.jsQR){for(const max of [1000,1600]){const c=toCanvas(b,max),x=c.getContext('2d',{willReadFrequently:true});
+    for(let k=0;k<5;k++){const d=x.getImageData(0,0,c.width,c.height),r=jsQR(d.data,c.width,c.height,{inversionAttempts:'dontInvert'});if(!r)break;out.add(r.data);const L=r.location;x.fillStyle='#fff';x.beginPath();x.moveTo(L.topLeftCorner.x,L.topLeftCorner.y);x.lineTo(L.topRightCorner.x,L.topRightCorner.y);x.lineTo(L.bottomRightCorner.x,L.bottomRightCorner.y);x.lineTo(L.bottomLeftCorner.x,L.bottomLeftCorner.y);x.closePath();x.fill()}
+    if(out.size)break}}
+  return [...out]}
+const codesToSids=(codes,cid)=>[...new Set(codes.map(c=>String(c).trim().toUpperCase().replace(/^AI5:/,'')).filter(s=>STUDENTS.some(x=>x.sid===s&&x.cid===cid)))];
+let busy=false;
+async function handleFiles(files){
+  if(!files.length)return;if(!assets)return toast('Không lưu được ảnh ở chế độ xem này.');
+  if(busy)return toast('Đang xử lí loạt ảnh trước, đợi chút nhé.');busy=true;
+  if(!('BarcodeDetector' in window))await needLib('jsqr');
+  const cid=curC,t=curT,pend=[];let ok=0;
+  for(const f of files){
+    const q={title:f.name,msg:'Đang đọc mã…',url:''};QUEUE.push(q);qDraw();await pause();
+    try{const b=await loadImg(f);const sids=codesToSids(await findCodes(b),cid);const u=await upPair(b);b.close&&b.close();q.url=u.url;
+      if(sids.length){for(const s of sids)await saveWork(s,t,u.imgId,sids,cid,{thumbId:u.thumbId});q.title=sids.map(s=>stu(s).name).join(', ');q.msg='✔ Đã xếp vào hồ sơ · CĐ '+t;ok++}
+      else{pend.push({q,u});q.msg='Không quét được mã QR'+(smp&&imgMax?', sẽ nhờ AI đọc mã số…':'.')}}
+    catch(err){q.msg='Lỗi: '+(err.code||err.message||'không đọc được ảnh')}qDraw()}
+  /* Ảnh không quét được QR: nhờ AI đọc mã số in trên thẻ (gom vài ảnh mỗi lần gọi) */
+  if(pend.length&&smp&&imgMax){for(let i=0;i<pend.length;i+=imgMax){const part=pend.slice(i,i+imgMax);
+    try{const blobs=await Promise.all(part.map(p=>fetch(img(p.u.imgId)).then(r=>r.blob())));
+      const res=await smp.json(`Mỗi ảnh chụp một sản phẩm mĩ thuật của học sinh, cạnh đó có một hoặc vài tấm thẻ in mã học sinh dạng "${cid}-07" (tên lớp, gạch ngang, hai chữ số). Đọc mã in to trên các thẻ. Chỉ trả về JSON: một mảng có ${part.length} phần tử theo thứ tự ảnh, mỗi phần tử là mảng các mã đọc được, ví dụ [["${cid}-07"],[]]. Không đọc được thì để mảng rỗng, không đoán.`,{images:blobs,modelTier:'quick'});
+      part.forEach((p,k)=>{p.sids=codesToSids(Array.isArray(res)&&Array.isArray(res[k])?res[k]:[],cid)})}catch(e){if(e.code==='not_granted')toast('Thầy cô chưa cho phép dùng AI; các ảnh này vào khay chờ gán tên.')}}}
+  for(const p of pend){try{
+      if(p.sids&&p.sids.length){for(const s of p.sids)await saveWork(s,t,p.u.imgId,p.sids,cid,{thumbId:p.u.thumbId});p.q.title=p.sids.map(s=>stu(s).name).join(', ');p.q.msg='✔ AI đọc mã số · đã xếp vào hồ sơ';ok++}
+      else{const id='IN'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);await db.doc('inbox/'+id).set({id,cid,t,imgId:p.u.imgId,thumbId:p.u.thumbId,at:Date.now()});p.q.msg='⚠ Chưa nhận diện: đã đưa vào khay chờ gán tên'}}
+    catch(err){p.q.msg='Lỗi lưu ảnh ('+(err.code||'lỗi')+')'}}
+  busy=false;qDraw();render(true);toast(`Xong: ${ok}/${files.length} ảnh đã vào hồ sơ.`)}
+/* Nhật kí thu bài: chỉ vẽ lại khung nhật kí, không vẽ lại cả trang */
+function qDraw(){const el=$('#qlog');if(!el)return;el.hidden=!QUEUE.length;el.innerHTML=`<h3>Nhật kí thu bài</h3>`+QUEUE.slice(-30).reverse().map(q=>`<div class="qrow">${q.url?`<img src="${q.url}" alt="">`:'<span class="qph">⏳</span>'}<div class="grow"><b>${esc(q.title)}</b><div class="sub">${esc(q.msg)}</div></div></div>`).join('')}
+async function saveWork(sid,t,imgId,group,cid,extra){
+  cid=cid||curC;const id=wid(cid,t,sid),ref=db.doc('works/'+id),old=await ref.get(),p=old.exists?old.data():null;extra=extra||{};
+  const doc={id,sid,cid,t,imgId,thumbId:extra.thumbId||null,group:group||[sid],at:Date.now(),vidId:extra.vidId||(p&&p.vidId)||null,vidUrl:extra.vidUrl||(p&&p.vidUrl)||null,thuyet:extra.thuyet!=null?extra.thuyet:(p&&p.thuyet||''),note:p&&p.note||'',tags:p&&p.tags||[],self:extra.self||null,selfText:extra.selfText||null,share:extra.share||null,strokesId:extra.strokesId||null,src:extra.src||'lop',show:extra.show!=null?extra.show!==false:!(p&&p.show===false),tl:p&&p.tl||null,title:extra.title||'',research:(extra.thuyetRaw||extra.way||extra.idea||extra.mh||extra.det!=null||extra.dp!=null||extra.xt)?{thuyet:extra.thuyetRaw||null,way:extra.way||'',idea:extra.idea||null,mh:extra.mh||null,det:extra.det??null,dp:extra.dp??null,xt:extra.xt||'',subAt:extra.subAt||null}:(p&&p.research||null),ai:null,grade:p&&p.grade||null,status:p&&p.grade?'duyet':'cho',flag:!!(p&&p.grade)};
+  await ref.set(doc);if(p&&p.imgId&&p.imgId!==imgId){dropAsset(p.imgId,id);dropAsset(p.thumbId,id)}if(p&&p.strokesId&&p.strokesId!==doc.strokesId)dropAsset(p.strokesId,id)}
+function dropAsset(aid,exceptId){if(!aid||!assets)return;setTimeout(()=>{const used=WORKS.some(w=>w.id!==exceptId&&[w.imgId,w.thumbId,w.vidId,w.strokesId].includes(aid))||INBOX.some(i=>[i.imgId,i.thumbId,i.strokesId].includes(aid));if(!used)assets.delete(aid).catch(()=>{})},1500)}
+function assignInbox(it){
+  if(!it)return;let pick=new Set();const R=roster();
+  openM(`<div class="sh"><h3>Gán tên cho ảnh · CĐ ${it.t}</h3>${it.meta?`<span class="sub">Phiếu ghi: ${esc(it.meta)}</span>`:''}<button class="btn" id="mx" aria-label="Đóng">✕</button></div><div class="frame"><img src="${img(it.imgId)}" alt="Ảnh sản phẩm"></div>
+   ${it.extra&&(it.extra.title||it.extra.thuyet)?`<div class="sub">${it.extra.title?'<b>'+esc(it.extra.title)+'</b>':''}${it.extra.thuyet?(it.extra.title?' · ':'')+esc(it.extra.thuyet):''}</div>`:''}
+   ${it.extra&&it.extra.vidUrl?`<div class="row"><a class="btn" href="${esc(it.extra.vidUrl)}" target="_blank" rel="noopener" style="text-decoration:none">▶ Xem video em quay (Google Drive)</a></div>`:''}
+   <p class="note" style="margin:0">Chọn một em, hoặc nhiều em nếu là bài nhóm.</p><div class="chips">${R.map(s=>`<button class="chip" data-p="${esc(s.sid)}">${s.stt}. ${esc(s.name)}${workOf(s.sid,it.t)?' ✓':''}</button>`).join('')}</div>
+   <div class="row end"><button class="btn danger" id="idel">Xoá ảnh</button><button class="btn pri" id="iok" disabled>Gán</button></div>`,1);
+  $('#mx').onclick=closeM;
+  $$('[data-p]').forEach(b=>b.onclick=()=>{const s=b.dataset.p;pick.has(s)?pick.delete(s):pick.add(s);b.classList.toggle('on');$('#iok').disabled=!pick.size});
+  $('#iok').onclick=async()=>{const g=[...pick];try{for(const s of g)await saveWork(s,it.t,it.imgId,g,it.cid,{...(it.extra||{}),thumbId:it.thumbId||null});await db.doc('inbox/'+it.id).delete();toast('Đã gán cho '+g.length+' em.');closeM()}catch(err){toast('Chưa gán được ('+err.code+').')}};
+  $('#idel').onclick=async()=>{try{await db.doc('inbox/'+it.id).delete();dropAsset(it.imgId,'');dropAsset(it.thumbId,'');toast('Đã xoá ảnh.');closeM()}catch(err){toast('Chưa xoá được ('+err.code+').')}};
+}
+
+
+/* ---- Nhập phiếu nộp bài từ nhà: PNG có khối dữ liệu tEXt "artisland" ---- */
+function readSlip(buf){
+  const u=new Uint8Array(buf),sig=[137,80,78,71,13,10,26,10];
+  if(u.length<16||sig.some((b,i)=>u[i]!==b))return null;
+  const dv=new DataView(buf);let p=8;
+  while(p+12<=u.length){const len=dv.getUint32(p),type=String.fromCharCode(u[p+4],u[p+5],u[p+6],u[p+7]);
+    if(type==='tEXt'){const d=u.subarray(p+8,p+8+len),z=d.indexOf(0),k=new TextDecoder('latin1').decode(d.subarray(0,z));
+      if(k==='artisland'){try{const bin=atob(new TextDecoder('latin1').decode(d.subarray(z+1))),by=Uint8Array.from(bin,c=>c.charCodeAt(0));return JSON.parse(new TextDecoder().decode(by))}catch(e){return null}}}
+    if(type==='IEND')break;p+=12+len}
+  return null}
+function slipSid(m){
+  let code=String(m.sid||'').trim().toUpperCase().replace(/\s+/g,'');const mm=code.match(/^(.+?)[-_.]?(\d{1,2})$/);if(mm&&!STUDENTS.some(s=>s.sid===code))code=mm[1].replace(/[-_.]$/,'')+'-'+mm[2].padStart(2,'0');if(STUDENTS.some(s=>s.sid===code))return code;
+  const nm=noMark(m.by).toLowerCase().replace(/\s+/g,' ').trim(),cl=noMark(m.cls).toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const hit=STUDENTS.filter(s=>(!cl||s.cid===cl)&&noMark(s.name).toLowerCase().replace(/\s+/g,' ').trim()===nm);return hit.length===1?hit[0].sid:null}
+/* Đưa một bài (phiếu PNG hoặc bài nộp online) vào hồ sơ; f là File/Blob ảnh */
+async function ingestSlip(m,f,q,how){
+  const t=(m.t||((m.lesson|0)+1))|0;if(t<1||t>8){q.msg='Bài của Đảo Sáng Tạo, không thuộc chủ đề nào nên không đưa vào sổ.';return 'skip'}
+      const bm=await loadImg(f),u=await upPair(bm),up={id:u.imgId};bm.close&&bm.close();q.url=u.url;let strokesId=null;
+      if(Array.isArray(m.strokes)&&m.strokes.length){const st=await assets.upload(new Blob([JSON.stringify(m.strokes)],{type:'application/json'}),{type:'application/json'});strokesId=st.id}
+      const th=m.thuyet&&typeof m.thuyet==='object'?[m.thuyet.yt&&('Yếu tố trọng tâm: '+m.thuyet.yt),m.thuyet.nl&&('Nguyên lí: '+m.thuyet.nl),m.thuyet.txt].filter(Boolean).join('. '):String(m.reflect||'');
+      const extra={thumbId:u.thumbId,selfText:Array.isArray(m.checkText)?m.checkText.map(x=>String(x).slice(0,120)).slice(0,3):(Array.isArray(m.check)&&CHK_TXT[t]?CHK_TXT[t]:null),thuyet:th.slice(0,500),self:Array.isArray(m.check)?m.check.map(Boolean).slice(0,3):null,share:Array.isArray(m.share)?m.share.map(x=>String(x||'').slice(0,300)).slice(0,3):null,strokesId,src:'nha',show:m.show!==false,title:String(m.title||'').slice(0,120),vidId:m.vidPath?'art:'+m.vidPath:null,vidUrl:m.vid&&/^[\w-]{10,}$/.test(m.vid.id||'')?'https://drive.google.com/file/d/'+m.vid.id+'/view':null,thuyetRaw:m.thuyet&&typeof m.thuyet==='object'?{yt:String(m.thuyet.yt||'').slice(0,40),nl:String(m.thuyet.nl||'').slice(0,80),txt:String(m.thuyet.txt||'').slice(0,600)}:null,way:String(m.way||'').slice(0,40),idea:m.idea&&typeof m.idea==='object'?{hero:String(m.idea.hero||'').slice(0,80),scene:String(m.idea.scene||'').slice(0,80),action:String(m.idea.action||'').slice(0,80),mood:String(m.idea.mood||'').slice(0,80)}:null,mh:Array.isArray(m.mh)?m.mh.slice(0,4).map(x=>x|0):null,det:m.det!=null?m.det|0:null,dp:m.dp!=null?m.dp|0:null,xt:String(m.xt||'').slice(0,300),subAt:m.at||null};
+      const sid=slipSid(m);
+      if(sid){const s=stu(sid);await saveWork(sid,t,up.id,[sid],s.cid,extra);q.title=s.name+' · CĐ '+t;q.msg='✔ '+how+' · đã xếp vào hồ sơ';return 'ok'}
+      else{const id='IN'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),cl=noMark(m.cls).toUpperCase().replace(/[^A-Z0-9]/g,'');
+        await db.doc('inbox/'+id).set({id,cid:CLASSES.some(c=>c.cid===cl)?cl:curC,t,imgId:up.id,thumbId:u.thumbId,strokesId,at:Date.now(),meta:`${m.by||'?'} · lớp ${m.cls||'?'}${m.sid?' · mã '+m.sid:''}`,extra});
+        q.msg='⚠ Không khớp danh sách lớp: đã đưa vào khay chờ gán tên (Lớp '+(cl||curC)+', CĐ '+t+')';return 'inb'}}
+$('#fSlip').onchange=async e=>{const files=[...e.target.files];e.target.value='';if(!files.length)return;if(!assets)return toast('Không lưu được ảnh ở chế độ xem này.');
+  if(busy)return toast('Đang xử lí loạt ảnh trước, đợi chút nhé.');busy=true;let ok=0,inb=0;
+  for(const f of files){const q={title:f.name,msg:'Đang đọc phiếu…',url:''};QUEUE.push(q);qDraw();await pause();
+    try{const m=readSlip(await f.arrayBuffer());
+      if(!m||m.app!=='art-island'){q.msg='⚠ Không phải phiếu nộp Art Island (hoặc phiếu đã bị nén). Dùng nút "Tải nhiều ảnh" để gán tên.';continue}
+      const r=await ingestSlip(m,f,q,'Phiếu từ nhà');if(r==='ok')ok++;else if(r==='inb')inb++}
+    catch(err){q.msg='Lỗi: '+(err.code||err.message||'không đọc được phiếu')}qDraw()}
+  busy=false;qDraw();render(true);toast(`Đã nhập ${ok} phiếu${inb?', '+inb+' phiếu chờ gán tên':''}.`)};
+
+
+/* ---- Nhận bài nộp online: trang nộp bài (Apps Script) lưu ảnh .jpg + thông tin .json vào thư mục Drive ---- */
+const DRV={server:'Google Drive',folder:'1NhuiOp2Eea8lcExfzPj2Eu_1LCzkiXhi',ret:'1YtD29zFr4H0n8Yo8ffMWCLCHBs-QQpXR'};
+const CHK_TXT={1:['Bài em có một yếu tố nổi bật nhất.','Em dùng cân bằng, tương phản hoặc lặp lại.','Em kể được mình đã dùng yếu tố nào.']};
+const drvErr=e=>{return AI.errText(e);const c=e&&e.code;return c==='server_not_connected'||c==='selection_required'?'Chưa kết nối Google Drive. Thêm Google Drive trong claude.ai › Cài đặt › Kết nối, rồi bấm lại.'
+  :c==='needs_reauth'?'Kết nối Google Drive đã hết hạn. Kết nối lại trong claude.ai › Cài đặt › Kết nối.'
+  :c==='not_in_manifest'||c==='approval_required'||c==='consent_required'?'Trang chưa được phép dùng Google Drive. Bấm lại và chọn Cho phép khi được hỏi.'
+  :c==='not_granted'||c==='capability_disabled'||c==='capability_removed'?'Chưa kết nối được máy chủ dữ liệu.'
+  :c==='server_unavailable'?'Google Drive đang bận, thử lại sau ít phút.'
+  :'Chưa đọc được Google Drive ('+(c||'lỗi')+(e&&e.message?': '+String(e.message).slice(0,80):'')+').'};
+/* Lấy chuỗi base64 từ kết quả download_file_content, chấp nhận nhiều dạng trả về */
+function b64Of(res){const pc=res&&res.payload&&res.payload.content;if(typeof pc==='string'&&pc.length)return pc.replace(/\s/g,'');const cands=[];const walk=(v,d)=>{if(d>5||v==null)return;if(typeof v==='string'){cands.push(v);return}if(Array.isArray(v)){v.forEach(x=>walk(x,d+1));return}if(typeof v==='object')Object.values(v).forEach(x=>walk(x,d+1))};
+  walk(res&&res.payload,0);(res&&res.content||[]).forEach(b=>{if(b.data)cands.push(b.data);if(b.resource&&b.resource.blob)cands.push(b.resource.blob);if(b.text)cands.push(b.text)});
+  for(let c of cands.sort((a,b)=>b.length-a.length)){c=c.trim();if(c.startsWith('data:'))c=c.slice(c.indexOf(',')+1);if(/^[A-Za-z0-9+/=_\-\s]+$/.test(c.slice(0,400))&&c.length>=8)return c.replace(/\s/g,'').replace(/-/g,'+').replace(/_/g,'/')}return null}
+const b64Bytes=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+async function drvList(pid){let all=[],tok=null,guard=0;
+  do{const inp={query:`parentId = '${pid||DRV.folder}'`,pageSize:100,excludeContentSnippets:true};if(tok)inp.pageToken=tok;
+    const r=await mcp.callTool(DRV.server,'search_files',inp,{cache:false}),p=r.payload||{};all=all.concat(Array.isArray(p.files)?p.files:[]);tok=p.nextPageToken&&Array.isArray(p.files)&&p.files.length?p.nextPageToken:null}while(tok&&++guard<20);
+  return all}
+async function drvGet(id){const r=await mcp.callTool(DRV.server,'download_file_content',{fileId:id},{cache:false});const b=b64Of(r);if(!b)throw{code:'format',message:'không đọc được nội dung file'};return b64Bytes(b)}
+let drvLast=0,drvOff=false;
+const drvNote=()=>{const e=$('#drvNote');if(e)e.textContent=drvOff?'Tự động nhận bài đang tắt. Bấm để nhận.':drvLast?'Tự động kiểm tra mỗi 2 phút · lần cuối '+new Date(drvLast).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'Bài học sinh gửi qua trang nộp bài. Mọi lớp, mọi chủ đề'};
+async function syncDrive(auto){auto=auto===true;
+  if(!mcp){if(!auto)toast('Chưa kết nối được máy chủ dữ liệu.');return}if(!assets){if(!auto)toast('Không lưu được ảnh ở chế độ xem này.');return}
+  if(busy){if(!auto)toast('Đang xử lí loạt ảnh trước, đợi chút nhé.');return}busy=true;const btn=$('#bDrv');if(btn)btn.disabled=true;if(!auto)drvOff=false;
+  const q0={title:'☁️ Nhận bài nộp online',msg:'Đang kiểm tra bài học sinh mới nộp…',url:''};if(!auto){QUEUE.push(q0);qDraw()}let ok=0,inb=0,skip=0,n=0;
+  try{const todo=await AIGV.newSubmissions();
+    n=todo.length;if(auto&&n){QUEUE.push(q0)}q0.msg=n?`Có ${n} bài mới. Đang nhận…`:'Không có bài mới.';qDraw();
+    for(const sub of todo){const q={title:sub.sid+' · CĐ '+sub.topic,msg:'Đang tải…',url:''};QUEUE.push(q);qDraw();await pause();
+      try{const m=Object.assign({},sub.meta||{},{app:'art-island',sid:sub.sid,cls:sub.class_id,t:sub.topic,title:sub.title||'',show:sub.show_in_gallery,vidPath:sub.video_path||null,at:sub.created_at});
+        if(!m.thuyet||typeof m.thuyet!=='object')m.thuyet={txt:sub.story||''};
+        const blob=await AIGV.fetchArt(sub.image_path);
+        const r=await ingestSlip(m,blob,q,'Nộp online');if(r==='ok')ok++;else if(r==='inb')inb++;else skip++;
+        await AIGV.markProcessed(sub.id)}
+      catch(err){q.msg='Lỗi: '+(err&&(err.message||err.code)||'không đọc được bài');if(err&&err.code==='needs_reauth')break}
+      qDraw()}
+    q0.msg=todo.length?`Xong: ${ok} bài vào hồ sơ${inb?', '+inb+' bài chờ gán tên':''}${skip?', '+skip+' bỏ qua':''}.`:'Không có bài mới.';
+    if(n||!auto)toast(n?q0.msg:'Chưa có bài nộp mới.');drvLast=Date.now()}
+  catch(err){q0.msg='Chưa nhận được bài: '+(err&&err.message||'lỗi');if(auto){drvOff=true;if(!QUEUE.includes(q0))QUEUE.push(q0)}toast(q0.msg)}
+  busy=false;if(btn)btn.disabled=false;qDraw();drvNote();if(n||!auto)render(true)}
+/* Tự động nhận bài: khi mở trang và mỗi 2 phút khi trang đang hiển thị */
+function drvAuto(){if(!mcp||!db||!assets||drvOff||document.hidden||!modal.hidden)return;syncDrive(true)}
+setTimeout(drvAuto,4000);window.addEventListener('ai-new-submission',()=>setTimeout(drvAuto,2500));setInterval(drvAuto,120000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-drvLast>60000)drvAuto()});
+
+/* ---- Trả phiếu đánh giá và gửi thông báo về Hộp thư học sinh (thư mục "Tra bai - Thong bao" trên Drive) ---- */
+async function drvWrite(title,obj){if(!mcp)throw{code:'not_granted'};return mcp.callTool(DRV.server,'create_file',{title,parentId:DRV.ret,textContent:JSON.stringify(obj),contentMimeType:'application/json',disableConversionToGoogleType:true},{cache:false})}
+async function thumbData(w){try{const b=await (await fetch(th(w))).blob();if(!b||b.size>150000)return null;return await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.onerror=()=>r(null);f.readAsDataURL(b)})}catch(e){return null}}
+async function sendPhieu(id,g0){const w=WORKS.find(x=>x.id===id);const g=g0||(w&&w.grade);if(!w||!g)return false;const s=stu(w.sid)||{};
+  try{const ph={app:'art-island-phieu',sid:w.sid,name:s.name||'',t:w.t,topic:TOPICS[w.t-1],title:w.title||'',lv:g.lv,overall:g.overall,fb:g.fb||'',crit:TCN,at:new Date(g.at||Date.now()).toISOString(),thumb:await thumbData(w)};
+    await AIGV.sendPhieu(w,ph);await db.doc('works/'+id).update({sentAt:Date.now()});return true}
+  catch(err){toast('Chưa trả được phiếu cho '+(s.name||w.sid)+': '+(err&&err.code?drvErr(err):'lỗi'));return false}}
+/* ---- Triển lãm lớp: bài được chọn hiện ở trang Art Island của học sinh (đọc qua trang nộp bài – Apps Script) ---- */
+const given=n=>{const p=String(n||'').trim().split(/\s+/);return p[p.length-1]||'Bạn nhỏ'};
+async function tlImgs(w){const b=await (await fetch(img(w.imgId))).blob(),bm=await loadImg(b);const big=toCanvas(bm,820).toDataURL('image/jpeg',.7),sm=toCanvas(bm,320).toDataURL('image/jpeg',.62);bm.close&&bm.close();return {big,sm}}
+async function tlSet(w,on){const s=stu(w.sid)||{},ts=Date.now();
+  if(on){const b=await (await fetch(img(w.imgId))).blob(),bm=await loadImg(b);
+    const big=await new Promise(r=>toCanvas(bm,820).toBlob(r,'image/jpeg',.7)),sm=await new Promise(r=>toCanvas(bm,320).toBlob(r,'image/jpeg',.62));bm.close&&bm.close();
+    await AIGV.gallery(w,true,{big,sm,by:given(s.name)+(w.group&&w.group.length>1?' và các bạn':''),title:String(w.title||'').slice(0,80),thuyet:String(w.thuyet||'').slice(0,300),kind:w.src==='nha'?'nha':'lop'})}
+  else await AIGV.gallery(w,false);
+  await db.doc('works/'+w.id).update({tl:on?ts:false});w.tl=on?ts:false}
+const tlOnNow=w=>w.tl?true:w.tl===false?false:(w.src==='nha'&&w.show!==false);
+async function tlBulk(list){if(!mcp)return toast('Chưa kết nối được máy chủ dữ liệu.');const L=list.filter(w=>w.status==='duyet'&&!tlOnNow(w)&&w.tl!==false&&w.show!==false);if(!L.length)return toast('Không có bài đã duyệt nào cần đưa lên triển lãm.');
+  toast('Đang đưa '+L.length+' bài lên triển lãm…');let ok=0;for(const w of L){try{await tlSet(w,true);ok++}catch(err){toast('Dừng lại: '+(err&&err.code?drvErr(err):'lỗi'));break}}toast('🖼️ Đã trưng bày '+ok+'/'+L.length+' bài.');render(true)}
+function announce(){
+  openM(`<div class="sh"><h3>📣 Gửi thông báo cho học sinh</h3><button class="btn" id="mx" aria-label="Đóng">✕</button></div>
+   <label>Gửi tới<select class="txt" id="anTo"><option value="${esc(curC)}">Lớp ${esc(curC)}</option><option value="ALL">Tất cả các lớp</option></select></label>
+   <label>Tiêu đề<input class="txt" id="anT" maxlength="80" placeholder="VD: Tuần sau mang đất nặn"></label>
+   <label>Nội dung<textarea class="txt" id="anB" rows="4" maxlength="600" placeholder="Viết ngắn gọn, dễ hiểu với học sinh lớp 5."></textarea></label>
+   <p class="note" style="margin:0">Thông báo hiện trong 🔔 Hộp thư của học sinh trên trang Art Island.</p>
+   <div class="row end"><button class="btn ok" id="anGo">Gửi thông báo</button></div>`,1);
+  $('#mx').onclick=closeM;
+  $('#anGo').onclick=async()=>{const t=$('#anT').value.trim(),b=$('#anB').value.trim();if(!t)return toast('Nhập tiêu đề thông báo.');const btn=$('#anGo');btn.disabled=true;btn.textContent='Đang gửi…';
+    try{await AIGV.announce($('#anTo').value,t.slice(0,80),b.slice(0,600));toast('Đã gửi thông báo.');closeM()}
+    catch(err){btn.disabled=false;btn.textContent='Gửi thông báo';toast(err&&err.code?drvErr(err):'Chưa gửi được.')}}}
+/* ===================== Tab: Sổ theo dõi ===================== */
+const hkSuggest=lv=>{const v=lv.filter(Boolean);if(!v.length)return null;const n=k=>v.filter(x=>x===k).length;if(n('C')>v.length/2)return'C';if(n('T')>=v.length/2&&!n('C'))return'T';return'H'};
+function vSo(){
+  const R=roster().filter(s=>!bookQ||noMark(s.name).toLowerCase().includes(noMark(bookQ).toLowerCase()));
+  const pendT=WORKS.filter(w=>w.cid===curC&&w.status==='cho'&&(!bookT||w.t===bookT)).length;
+  let body;
+  if(!bookT){body=`<div class="tw"><table class="grid"><thead><tr><th>Học sinh</th>${TOPICS.map((n,i)=>`<th class="c" title="${esc(n)}">CĐ${i+1}</th>`).join('')}<th class="c">HK I</th><th class="c">HK II</th></tr></thead><tbody>
+    ${R.map(s=>{const h=HK[s.sid]||{};return `<tr><td><button class="nm" data-kid="${esc(s.sid)}">${s.stt}. ${esc(s.name)}</button></td>${TOPICS.map((_,i)=>{const w=workOf(s.sid,i+1);return `<td class="c"><button class="cell" ${w?`data-w="${esc(w.id)}"`:`data-add="${esc(s.sid)}" data-at="${i+1}"`} aria-label="Chủ đề ${i+1}">${stPill(w)}${w&&w.flag?' ⚑':''}</button></td>`}).join('')}<td class="c"><button class="cell" data-hk="${esc(s.sid)}">${lvPill(h.hk1)||'<span class="pill stNone">·</span>'}</button></td><td class="c"><button class="cell" data-hk="${esc(s.sid)}">${lvPill(h.hk2)||'<span class="pill stNone">·</span>'}</button></td></tr>`}).join('')}</tbody></table></div>
+    <p class="note">⏳ đã thu, chờ đánh giá · ✨ AI đã gợi ý · HTT / HT / CHT: GV đã duyệt · ⚑ ảnh đã thay sau khi duyệt, nên xem lại. Bấm ô trống để tải ảnh riêng cho em đó.</p>`}
+  else{const L=WORKS.filter(w=>w.cid===curC&&w.t===bookT&&(!bookQ||R.some(s=>s.sid===w.sid))).sort((a,b)=>({cho:0,ai:1,duyet:2}[a.status]-{cho:0,ai:1,duyet:2}[b.status])||(stu(a.sid)?.stt||0)-(stu(b.sid)?.stt||0));
+    body=L.length?`<div class="cards">${L.map(w=>{const s=stu(w.sid)||{};return `<button class="wk" data-w="${esc(w.id)}"><img src="${th(w)}" alt="" loading="lazy"><b>${s.stt||''}. ${esc(s.name||w.sid)}</b><div class="row" style="justify-content:space-between">${stPill(w)}${w.vidId||w.vidUrl?'<span title="Có video">🎬</span>':''}${w.group&&w.group.length>1?'<span class="sub">Bài nhóm</span>':''}${w.flag?'<span title="Ảnh đã thay">⚑</span>':''}</div></button>`}).join('')}</div>`:`<div class="empty"><b>Chưa có bài nào cho chủ đề ${bookT}</b>Vào tab Thu bài để chụp sản phẩm của lớp.</div>`}
+  $('#view').innerHTML=`<section class="card f"><div class="sh"><h3>Sổ theo dõi · Lớp ${esc(curC)}</h3><div class="row"><input class="txt" id="q" placeholder="Tìm tên học sinh" value="${esc(bookQ)}" style="width:200px"><button class="btn vio" id="aiAll" ${pendT&&smp&&imgMax?'':'disabled'}>✨ AI gợi ý ${pendT} bài chờ</button><button class="btn" id="csv">⬇️ Xuất bảng (CSV)</button><button class="btn" id="rsx" title="Kế hoạch Giàn giáo 3, lời Kể về bài, Mắt hoạ sĩ của từng bài nộp, kèm phiếu chấm mù">📊 Xuất dữ liệu nghiên cứu (Excel)</button><button class="btn" id="tlAll" title="Đưa các bài đã duyệt (em đồng ý trưng bày) lên Triển lãm lớp của học sinh">🖼️ Trưng bày bài đã duyệt</button></div></div>${topicBar(bookT,null,true)}${bookT?`<p class="note" style="margin:0"><b>Chủ đề ${bookT}:</b> ${esc(TOPICS[bookT-1])}</p>`:''}${body}</section>`;
+  bindTopics(t=>{bookT=t;pref.set('bookT',t);render(true)});
+  $('#q').oninput=e=>{bookQ=e.target.value;clearTimeout(vSo.k);vSo.k=setTimeout(()=>{render(true);setTimeout(()=>{const q=$('#q');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}},30)},250)};
+  $$('[data-w]').forEach(b=>b.onclick=()=>review(b.dataset.w));
+  $$('[data-add]').forEach(b=>b.onclick=()=>{curT=+b.dataset.at;oneSid=b.dataset.add;$('#fOne').click()});
+  $$('[data-kid]').forEach(b=>b.onclick=()=>profile(b.dataset.kid));
+  $$('[data-hk]').forEach(b=>b.onclick=()=>profile(b.dataset.hk));
+  $('#aiAll').onclick=()=>aiBatch(WORKS.filter(w=>w.cid===curC&&w.status==='cho'&&(!bookT||w.t===bookT)));
+  $('#csv').onclick=exportCsv;$('#rsx').onclick=exportResearch;
+  $('#tlAll').onclick=()=>tlBulk(WORKS.filter(w=>w.cid===curC&&(!bookT||w.t===bookT)));
+}
+
+/* ---- Màn hình đánh giá một bài ---- */
+function review(id){
+  const w=WORKS.find(x=>x.id===id);if(!w)return;const s=stu(w.sid)||{name:w.sid},C=crit(w.t);
+  const st={lv:(w.grade&&w.grade.lv)||[null,null,null],overall:w.grade&&w.grade.overall||null,fb:w.grade&&w.grade.fb||'',tags:new Set(w.tags||[])};
+  const list=WORKS.filter(x=>x.cid===w.cid&&(bookT?x.t===bookT:x.t===w.t)).sort((a,b)=>(stu(a.sid)?.stt||0)-(stu(b.sid)?.stt||0)),ix=list.findIndex(x=>x.id===id);
+  const ai=w.ai;
+  const lvRow=i=>`<div class="lvb">${LVK.map(k=>`<button data-c="${i}" data-k="${k}" class="${k} ${st.lv[i]===k?'on':''}">${LVS[k]}${ai&&ai.lv&&ai.lv[i]===k?'<span class="ai">AI</span>':''}</button>`).join('')}</div>`;
+  openM(`<div class="sh"><div><h3>${esc(s.name)} · CĐ ${w.t}</h3><span class="sub">${esc(TOPICS[w.t-1])} · thu ngày ${new Date(w.at).toLocaleDateString('vi-VN')}${w.group&&w.group.length>1?' · Bài nhóm: '+w.group.map(g=>esc(stu(g)?.name||g)).join(', '):''}</span></div><div class="row"><button class="btn" id="pv" ${ix>0?'':'disabled'}>‹ Bài trước</button><button class="btn" id="nx" ${ix<list.length-1?'':'disabled'}>Bài sau ›</button><button class="btn" id="mx" aria-label="Đóng">✕</button></div></div>
+   ${w.flag?'<div class="warn">⚑ Ảnh đã được chụp lại sau khi duyệt. Thầy cô xem lại mức đánh giá rồi bấm Duyệt.</div>':''}
+   <div class="rv"><div class="f">
+     <div class="frame"><img id="rvImg" src="${img(w.imgId)}" alt="Sản phẩm của ${esc(s.name)}"><canvas id="rvTl" width="1000" height="625" hidden></canvas></div>
+     ${w.src==='nha'?`<div class="note">📥 Nộp từ nhà${w.title?' · '+esc(w.title):''}${w.strokesId?' · <button class="btn" id="tlB">▶ Xem quá trình vẽ</button>':''}</div>`:''}
+     ${w.self?`<div><b style="font-size:14px">Em tự kiểm tra</b><div class="sub">${(w.selfText||C.check).map((c,i)=>(w.self[i]?'✔ ':'○ ')+esc(c)).join('<br>')}</div></div>`:''}
+     ${w.share&&w.share.some(Boolean)?`<div><b style="font-size:14px">Em chia sẻ</b><div class="sub">${w.share.map((a,i)=>a?`<b>${['Chỗ nổi bật nhất (yếu tố)','Cách sắp xếp (nguyên lí)','Em thích nhất'][i]}:</b> ${esc(a)}`:'').filter(Boolean).join('<br>')}</div></div>`:''}
+     ${w.vidId?`<div class="frame"><video src="${img(w.vidId)}" controls preload="metadata"></video></div>`:''}
+     ${w.vidUrl?`<div class="row"><a class="btn" href="${esc(w.vidUrl)}" target="_blank" rel="noopener" style="text-decoration:none">▶ Xem video em quay (Google Drive)</a></div>`:''}
+     <div class="row">${w.src==='nha'?'':`<button class="btn" id="vid">🎬 ${w.vidId?'Đổi video':'Thêm video (sản phẩm 3D)'}</button><button class="btn" id="reimg">🔁 Chụp lại ảnh</button>`}<button class="btn danger" id="wdel">Xoá bài</button></div>
+     ${w.src==='nha'?`<div><b style="font-size:14px">Thuyết minh của em</b><div class="sub">${w.thuyet?esc(w.thuyet):'Em chưa gửi thuyết minh.'}</div><textarea id="thuyet" hidden>${esc(w.thuyet||'')}</textarea></div>`:`<label>Thuyết minh của em <span class="note">(em nói trên lớp, thầy cô ghi lại nếu cần)</span><textarea id="thuyet" rows="2" placeholder="VD: Em chọn màu làm trọng tâm…">${esc(w.thuyet||'')}</textarea></label>`}
+     <div><b style="font-size:14px">Ghi chú của thầy cô</b> <span class="note">(quan sát quá trình em làm, chỉ thầy cô thấy)</span><div class="chips" style="margin-top:4px">${NOTE_TAGS.map(t=>`<button class="tag ${st.tags.has(t)?'on':''}" data-tag="${esc(t)}">${t}</button>`).join('')}</div><input class="txt" id="note" style="margin-top:6px" placeholder="Ghi chú thêm (không bắt buộc)" value="${esc(w.note||'')}"></div>
+   </div><div class="f">
+     ${C.draft?'<div class="note">Tiêu chí đang là bản nháp soạn từ SGV. Thầy cô có thể sửa ở tab Tiêu chí.</div>':''}
+     ${C.items.map((it,i)=>`<div class="crit"><h4>${i+1}. ${TCN[i]} <span class="sub">· ${TCSUB[i]}</span></h4>${lvRow(i)}<div class="desc" id="d${i}">${st.lv[i]?esc(it[LVK.indexOf(st.lv[i])]):(i===2?'Thầy cô ghi nhận khi em giới thiệu sản phẩm lúc trưng bày (hoặc qua phần em chia sẻ trong phiếu nộp).':'Chọn một mức để xem mô tả.')}</div></div>`).join('')}
+     <div class="crit" style="border-color:var(--ink)"><h4>Mức đạt của chủ đề</h4><div class="lvb" id="ovr">${LVK.map(k=>`<button data-o="${k}" class="${k} ${st.overall===k?'on':''}">${LVN[k]}${ai&&ai.overall===k?'<span class="ai">AI</span>':''}</button>`).join('')}</div></div>
+     ${ai?`<div class="aibox"><b>✨ AI gợi ý:</b> ${esc(ai.fb||'')}<div class="sub" style="margin-top:4px">${esc(ai.why||'')}</div><div class="row end" style="margin-top:6px"><button class="btn" id="useAi">Dùng gợi ý của AI</button></div></div>`:''}
+     <label>Nhận xét gửi em <span class="note">(khen – góp ý nhẹ – động viên)</span><textarea id="fb" rows="4">${esc(st.fb)}</textarea></label>
+     <div class="note" style="background:#eef7ff;border-radius:12px;padding:8px 12px">${w.grade?(w.sentAt?'📬 Đã trả phiếu về Hộp thư của em lúc '+new Date(w.sentAt).toLocaleString('vi-VN')+'.':'⚠ Đã duyệt nhưng phiếu chưa về Hộp thư của em.')+` <button class="btn" id="resend" style="padding:4px 10px">${w.sentAt?'📬 Trả lại phiếu':'📬 Trả phiếu ngay'}</button>`:'📬 Bấm <b>Duyệt và trả phiếu</b> để lưu đánh giá và gửi phiếu về 🔔 Hộp thư của em.'}</div>
+     <div class="note" style="background:#fff6e6;border-radius:12px;padding:8px 12px">🖼️ <b>Triển lãm lớp:</b> ${w.show===false?'Em chưa đồng ý cho các bạn xem bài này.':tlOnNow(w)?(w.tl?'Đang trưng bày cho cả lớp xem.':'Đang trưng bày (tự hiện khi em nộp bài).')+' <button class="btn" id="tlOn" style="padding:4px 10px">Gỡ xuống</button>':'Chưa trưng bày. <button class="btn" id="tlOn" style="padding:4px 10px">🖼️ Đưa vào triển lãm lớp</button>'}</div>
+     <div class="row end"><button class="btn vio" id="aiOne" ${smp&&imgMax?'':'disabled'}>✨ ${ai?'AI gợi ý lại':'AI gợi ý'}</button><button class="btn" id="draft">Lưu nháp</button><button class="btn ok" id="ok">✔ Duyệt và trả phiếu</button></div>
+   </div></div>`);
+  const sync=()=>{$$('[data-c]').forEach(b=>b.classList.toggle('on',st.lv[+b.dataset.c]===b.dataset.k));$$('[data-o]').forEach(b=>b.classList.toggle('on',st.overall===b.dataset.o));C.items.forEach((it,i)=>{if(st.lv[i])$('#d'+i).textContent=it[LVK.indexOf(st.lv[i])]})};
+  $$('[data-c]').forEach(b=>b.onclick=()=>{const i=+b.dataset.c;st.lv[i]=st.lv[i]===b.dataset.k?null:b.dataset.k;if(!st.overall||st.overall===st.auto){st.auto=hkSuggest(st.lv);st.overall=st.auto}sync()});
+  $$('[data-o]').forEach(b=>b.onclick=()=>{st.overall=b.dataset.o;st.auto=null;sync()});
+  $$('[data-tag]').forEach(b=>b.onclick=()=>{const t=b.dataset.tag;st.tags.has(t)?st.tags.delete(t):st.tags.add(t);b.classList.toggle('on')});
+  const ua=$('#useAi');if(ua)ua.onclick=()=>{ai.lv.forEach((l,i)=>{if(l)st.lv[i]=l});if(ai.overall)st.overall=ai.overall;$('#fb').value=ai.fb||'';sync()};
+  $('#mx').onclick=closeM;
+  const save=async(final)=>{const data={thuyet:$('#thuyet').value.trim().slice(0,500),note:$('#note').value.trim().slice(0,300),tags:[...st.tags]};
+    if(final){if(!st.overall)return toast('Chọn mức đạt của chủ đề trước khi duyệt.');data.grade={lv:st.lv,overall:st.overall,fb:$('#fb').value.trim().slice(0,800),at:Date.now()};data.status='duyet';data.flag=false}
+    else data.draftGrade={lv:st.lv,overall:st.overall,fb:$('#fb').value.trim().slice(0,800)};
+    try{await db.doc('works/'+w.id).update(data);toast(final?'Đã duyệt bài của '+s.name+'. Đang trả phiếu về Hộp thư…':'Đã lưu nháp.');if(final){const wid0=w.id,nm=s.name,g0=data.grade;setTimeout(async()=>{if(await sendPhieu(wid0,g0))toast('📬 Đã trả phiếu cho '+nm+'.')},400)}if(final&&ix<list.length-1)review(list[ix+1].id);else if(final)closeM()}catch(err){toast('Chưa lưu được ('+err.code+').')}};
+  if(!w.grade&&w.draftGrade){st.lv=w.draftGrade.lv||st.lv;st.overall=w.draftGrade.overall||null;$('#fb').value=w.draftGrade.fb||'';sync()}
+  $('#draft').onclick=()=>save(false);$('#ok').onclick=()=>save(true);
+  if($('#tlOn'))$('#tlOn').onclick=async()=>{const b=$('#tlOn'),on=!tlOnNow(w);b.disabled=true;b.textContent=on?'Đang đưa lên…':'Đang gỡ…';try{await tlSet(w,on);toast(on?'🖼️ Đã đưa bài của '+s.name+' vào triển lãm lớp.':'Đã gỡ bài khỏi triển lãm.');review(w.id)}catch(err){b.disabled=false;b.textContent='Thử lại';toast(err&&err.code?drvErr(err):'Chưa làm được.')}};
+  if($('#resend'))$('#resend').onclick=async()=>{const b=$('#resend');b.disabled=true;b.textContent='Đang gửi…';if(await sendPhieu(w.id)){toast('📬 Đã trả phiếu cho '+s.name+'.');review(w.id)}else{b.disabled=false;b.textContent='Thử lại'}};
+  $('#pv').onclick=()=>review(list[ix-1].id);$('#nx').onclick=()=>review(list[ix+1].id);
+  $('#aiOne').onclick=async()=>{const b=$('#aiOne');b.disabled=true;b.textContent='✨ AI đang xem bài…';await db.doc('works/'+w.id).update({thuyet:$('#thuyet').value.trim().slice(0,500)}).catch(()=>{});
+    const r=await aiEval([{...w,thuyet:$('#thuyet').value.trim()}]);if(r)review(w.id);else{b.disabled=false;b.textContent='✨ AI gợi ý'}};
+  if($('#vid'))$('#vid').onclick=()=>{vidFor=w.id;$('#fVid').click()};
+  const tlB=$('#tlB');if(tlB)tlB.onclick=async()=>{tlB.disabled=true;try{const st=await (await fetch(img(w.strokesId))).json();$('#rvImg').hidden=true;const c=$('#rvTl');c.hidden=false;playTL(st,c.getContext('2d'),()=>tlB.disabled=false)}catch(e){tlB.disabled=false;toast('Không tải được quá trình vẽ.')}};
+  if($('#reimg'))$('#reimg').onclick=()=>{curT=w.t;oneSid=w.sid;closeM();$('#fOne').click()};
+  $('#wdel').onclick=()=>confirmM('Xoá bài của '+s.name+' (CĐ '+w.t+')?','Ảnh, video và đánh giá của bài này sẽ bị xoá.',async()=>{try{await db.doc('works/'+w.id).delete();dropAsset(w.imgId,w.id);dropAsset(w.thumbId,w.id);dropAsset(w.vidId,w.id);toast('Đã xoá bài.')}catch(err){toast('Chưa xoá được ('+err.code+').')}});
+}
+let vidFor=null;
+$('#fVid').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f||!vidFor)return;const id=vidFor;vidFor=null;if(f.size>20*1024*1024)return toast('Video quá 20 MB. Thầy cô quay ngắn hơn (10–20 giây) nhé.');
+  toast('Đang tải video lên…');try{const w=WORKS.find(x=>x.id===id);const up=await assets.upload(f,{type:f.type||'video/mp4'});await db.doc('works/'+id).update({vidId:up.id});if(w&&w.vidId)dropAsset(w.vidId,id);toast('Đã thêm video.');review(id)}catch(err){toast('Chưa tải được video ('+(err.code||'lỗi')+').')}};
+
+/* ---- AI gợi ý đánh giá: gửi ảnh + tiêu chí, nhận mức & nhận xét kiểu sandwich ---- */
+function evalPrompt(t,items){const C=crit(t);return `Bạn hỗ trợ giáo viên Mĩ thuật lớp 5 (SGK Mĩ thuật 5, bộ Kết nối tri thức với cuộc sống) đánh giá sản phẩm của học sinh theo Thông tư 27/2020: T = Hoàn thành tốt, H = Hoàn thành, C = Chưa hoàn thành. Giáo viên sẽ xem và quyết định; bạn chỉ gợi ý.
+Chủ đề ${t}: ${TOPICS[t-1]}.
+Tiêu chí:
+${C.items.map((it,i)=>`${i+1}. ${TCN[i]} — T: ${it[0]} | H: ${it[1]} | C: ${it[2]}`).join('\n')}
+Mỗi ảnh là sản phẩm hoàn thiện của một học sinh (hoặc một nhóm). Bỏ qua tấm thẻ mã cạnh sản phẩm.
+- Tiêu chí 1 chỉ đánh giá khi có lời thuyết minh của em (chữ viết trong ảnh, hoặc phần "Thuyết minh" dưới đây); không có thì để null.
+- Tiêu chí 3 chỉ đánh giá khi có phần "Em chia sẻ" dưới đây; không có thì để null (giáo viên quan sát lúc trưng bày).
+- Tiêu chí 2 đánh giá theo những gì nhìn thấy trong ảnh. Tôn trọng nét riêng của em; không lấy độ "giống thật" làm chuẩn.
+${items.map((w,i)=>`Ảnh ${i+1}: ${w.thuyet?'Thuyết minh: "'+w.thuyet.slice(0,300)+'"':'Không có thuyết minh gõ kèm.'}${w.share&&w.share.some(Boolean)?' Em chia sẻ: "'+w.share.filter(Boolean).join(' / ').slice(0,400)+'"':''}${w.tags&&w.tags.length?' Ghi chú quá trình của GV: '+w.tags.join(', ')+'.':''}`).join('\n')}
+Viết nhận xét gửi học sinh theo phương pháp sandwich, 3 câu: (1) khen cụ thể điều em làm được; (2) một gợi ý nhẹ nhàng để bài đẹp hơn; (3) lời động viên. Xưng "em", tối đa 60 từ, dùng từ ngữ trong SGK lớp 5, không so sánh với bạn khác, không dùng từ "xấu", "sai", "kém".
+Chỉ trả về JSON: một mảng ${items.length} phần tử theo thứ tự ảnh, mỗi phần tử {"lv":[mức tiêu chí 1 hoặc null, mức tiêu chí 2, mức tiêu chí 3 hoặc null],"overall":"T"|"H"|"C","fb":"nhận xét gửi em","why":"một câu ngắn giải thích cho giáo viên"}.`}
+let aiCtl=null;
+async function aiEval(items,onProg){
+  if(!smp||!imgMax){toast('AI chưa sẵn sàng ở chế độ xem này.');return false}
+  aiCtl=new AbortController();let done=0;
+  try{const byT={};items.forEach(w=>(byT[w.t]=byT[w.t]||[]).push(w));
+    for(const t in byT){const L=byT[t];for(let i=0;i<L.length;i+=imgMax){if(aiCtl.signal.aborted)return done>0;const part=L.slice(i,i+imgMax);
+      const blobs=await Promise.all(part.map(w=>fetch(img(w.imgId)).then(r=>{if(!r.ok)throw{code:'img'};return r.blob()})));
+      const res=await smp.json(evalPrompt(+t,part),{images:blobs,signal:aiCtl.signal});
+      for(let k=0;k<part.length;k++){const r=Array.isArray(res)?res[k]:null;if(!r)continue;const ok=v=>LVK.includes(v)?v:null;
+        const aiv={lv:[ok(r.lv&&r.lv[0]),ok(r.lv&&r.lv[1]),part[k].share&&part[k].share.some(Boolean)?ok(r.lv&&r.lv[2]):null],overall:ok(r.overall),fb:String(r.fb||'').slice(0,600),why:String(r.why||'').slice(0,300),at:Date.now()};
+        const cur=WORKS.find(x=>x.id===part[k].id);await db.doc('works/'+part[k].id).update({ai:aiv,status:cur&&cur.status==='duyet'?'duyet':'ai'});done++}
+      onProg&&onProg(done)}}
+    return true}
+  catch(e){const m={not_granted:'Thầy cô chưa cho phép dùng AI.',rate_limited:'AI đang bận, thử lại sau ít phút.',cancelled:'Đã dừng.',invalid_json:'AI trả lời chưa đúng định dạng, thử lại nhé.',img:'Không tải được ảnh bài.'};toast(m[e.code]||('AI chưa gợi ý được ('+(e.code||'lỗi')+').'));return done>0}
+  finally{aiCtl=null}}
+function aiBatch(L){
+  if(!L.length)return;
+  openM(`<h3>✨ AI đang gợi ý ${L.length} bài</h3><p class="note" style="margin:0">AI xem ảnh và gợi ý mức, lời nhận xét. Thầy cô vẫn duyệt từng bài.</p><div class="meter"><i id="pg" style="width:0%"></i></div><p id="pgt" class="note" style="margin:0">Đang bắt đầu… (lần đầu có hộp hỏi cho phép dùng AI)</p><div class="row end"><button class="btn" id="stop">Dừng</button></div>`,1);
+  $('#stop').onclick=()=>{aiCtl&&aiCtl.abort();closeM()};
+  aiEval(L,d=>{const p=$('#pg');if(p){p.style.width=(d/L.length*100)+'%';$('#pgt').textContent=`Đã gợi ý ${d}/${L.length} bài`}}).then(()=>{if(!modal.hidden&&$('#pg')){closeM();toast('AI đã gợi ý xong. Mở từng bài để duyệt.')}})}
+
+/* ---- Hồ sơ một học sinh + tổng hợp học kì ---- */
+function profile(sid){
+  const s=stu(sid);if(!s)return;const h=HK[sid]||{};const W=t=>workOf(sid,t);
+  const sug=k=>hkSuggest((k===1?[1,2,3,4]:[5,6,7,8]).map(t=>W(t)&&W(t).status==='duyet'&&W(t).grade?W(t).grade.overall:null));
+  openM(`<div class="sh"><div><h3>${esc(s.name)}</h3><span class="sub">Lớp ${esc(s.cid)} · Mã ${esc(s.sid)}</span></div><button class="btn" id="mx" aria-label="Đóng">✕</button></div>
+   <div class="tw"><table><thead><tr><th>Chủ đề</th><th>Sản phẩm</th><th>Mức</th><th>Nhận xét</th></tr></thead><tbody>${TOPICS.map((n,i)=>{const w=W(i+1);return `<tr><td><b>CĐ ${i+1}</b><div class="sub">${esc(n)}</div></td><td>${w?`<button class="cell" data-w="${esc(w.id)}"><img class="thumb" src="${th(w)}" alt="" loading="lazy"></button>`:'<span class="sub">Chưa có</span>'}</td><td>${stPill(w)}</td><td class="sub" style="max-width:340px">${w&&w.grade?esc(w.grade.fb):''}</td></tr>`}).join('')}</tbody></table></div>
+   <div class="g2">${[1,2].map(k=>`<div class="crit"><h4>Học kì ${k===1?'I (CĐ 1–4)':'II (CĐ 5–8)'}</h4><div class="lvb">${LVK.map(l=>`<button data-h="${k}" data-l="${l}" class="${l} ${h['hk'+k]===l?'on':''}">${LVN[l]}</button>`).join('')}</div><div class="sub">${sug(k)?'Gợi ý theo các chủ đề đã duyệt: '+LVN[sug(k)]:'Chưa đủ chủ đề đã duyệt để gợi ý.'} Thầy cô quyết định.</div></div>`).join('')}</div>`);
+  $('#mx').onclick=closeM;$$('#sheet [data-w]').forEach(b=>b.onclick=()=>review(b.dataset.w));
+  $$('[data-h]').forEach(b=>b.onclick=async()=>{const k=b.dataset.h,l=b.dataset.l,cur=(HK[sid]||{})['hk'+k];try{await db.doc('hk/'+sid).set({...(HK[sid]||{sid}),sid,['hk'+k]:cur===l?null:l,at:Date.now()});HK[sid]={...(HK[sid]||{}),sid,['hk'+k]:cur===l?null:l};profile(sid)}catch(err){toast('Chưa lưu được ('+err.code+').')}});
+}
+async function exportCsv(){
+  const R=roster();if(!R.length)return toast('Lớp chưa có học sinh.');if(!dl)return toast('Chế độ xem này không tải file được.');
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const L=x=>x?LVN[x]:'';
+  const head=['STT','Mã','Họ và tên',...TOPICS.flatMap((_,i)=>['CĐ'+(i+1)+' – mức','CĐ'+(i+1)+' – nhận xét']),'Học kì I','Học kì II'];
+  const rows=R.map(s=>[s.stt,s.sid,s.name,...TOPICS.flatMap((_,i)=>{const w=workOf(s.sid,i+1);return w&&w.grade?[L(w.grade.overall),w.grade.fb]:[w?'Chờ duyệt':'','']}),L((HK[s.sid]||{}).hk1),L((HK[s.sid]||{}).hk2)]);
+  try{await dl.save({filename:`SoTheoDoi_MiThuat5_${curC}_${new Date().toISOString().slice(0,10)}.csv`,data:'﻿'+[head,...rows].map(r=>r.map(q).join(',')).join('\r\n')});toast('Đã tải bảng.')}catch(e){if(e.code!=='declined')toast('Chưa tải được ('+e.code+').')}}
+
+
+/* ===================== Xuất dữ liệu nghiên cứu (Excel) ===================== */
+/* Tạo tệp .xlsx gọn, không cần thư viện ngoài: sheets=[{name,rows,widths,freeze,filter}] */
+const XL=(()=>{const CT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+ const crc=b=>{let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CT[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0};
+ const enc=new TextEncoder(),X=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'');
+ const col=i=>{let s='';i++;while(i){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=(i-m-1)/26}return s};
+ function zip(files){const parts=[],cen=[];let off=0;for(const f of files){const nm=enc.encode(f.name),d=enc.encode(f.data),c=crc(d),h=new DataView(new ArrayBuffer(30));
+  h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint32(14,c,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nm.length,true);
+  parts.push(new Uint8Array(h.buffer),nm,d);const e=new DataView(new ArrayBuffer(46));e.setUint32(0,0x02014b50,true);e.setUint16(4,20,true);e.setUint16(6,20,true);e.setUint16(8,0x0800,true);e.setUint32(16,c,true);e.setUint32(20,d.length,true);e.setUint32(24,d.length,true);e.setUint16(28,nm.length,true);e.setUint32(42,off,true);
+  cen.push(new Uint8Array(e.buffer),nm);off+=30+nm.length+d.length}
+  const cs=cen.reduce((a,x)=>a+x.length,0),end=new DataView(new ArrayBuffer(22));end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);end.setUint32(12,cs,true);end.setUint32(16,off,true);
+  return new Blob([...parts,...cen,new Uint8Array(end.buffer)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}
+ function sheet(sh){const R=sh.rows,nc=Math.max(...R.map(r=>r.length));let x='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0">';
+  if(sh.freeze)x+=`<pane xSplit="${sh.freeze[0]}" ySplit="${sh.freeze[1]}" topLeftCell="${col(sh.freeze[0])}${sh.freeze[1]+1}" activePane="bottomRight" state="frozen"/>`;x+='</sheetView></sheetViews>';
+  if(sh.widths)x+='<cols>'+sh.widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')+'</cols>';
+  x+='<sheetData>'+R.map((r,ri)=>`<row r="${ri+1}">`+r.map((v,ci)=>{if(v===''||v==null)return '';const ref=col(ci)+(ri+1),st=(sh.bold||[]).includes(ri)?' s="1"':' s="2"';return typeof v==='number'&&isFinite(v)?`<c r="${ref}"${st}><v>${v}</v></c>`:`<c r="${ref}"${st} t="inlineStr"><is><t xml:space="preserve">${X(v)}</t></is></c>`}).join('')+'</row>').join('')+'</sheetData>';
+  if(sh.filter&&R.length>1)x+=`<autoFilter ref="A1:${col(nc-1)}${R.length}"/>`;return x+'</worksheet>'}
+ return sheets=>{const W=sheets.map((s,i)=>`<sheet name="${X(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('');
+  const files=[{name:'[Content_Types].xml',data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')+'</Types>'},
+   {name:'_rels/.rels',data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
+   {name:'xl/workbook.xml',data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+W+'</sheets></workbook>'},
+   {name:'xl/_rels/workbook.xml.rels',data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+sheets.map((_,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')+`<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+   {name:'xl/styles.xml',data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFDE9C9"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'},
+   ...sheets.map((s,i)=>({name:`xl/worksheets/sheet${i+1}.xml`,data:sheet(s)}))];
+  return zip(files)}})();
+/* mã chấm mù: cố định theo từng bài, không lộ tên, lớp, chủ đề */
+function blindCode(id){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let h=2166136261>>>0,o='';const mix=t=>{for(const c of String(t)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)>>>0}};mix(id);for(let i=0;i<5;i++){o+=A[h%32];mix(i+'|'+id)}return 'B-'+o}
+function splitThuyet(w){const r=w.research&&w.research.thuyet;if(r)return r;const t=String(w.thuyet||'');const yt=(t.match(/Yếu tố trọng tâm:\s*([^.]*)/)||[])[1]||'',nl=(t.match(/Nguyên lí:\s*([^.]*)/)||[])[1]||'';
+ const txt=t.replace(/Yếu tố trọng tâm:\s*[^.]*\.?\s*/,'').replace(/Nguyên lí:\s*[^.]*\.?\s*/,'').trim();return {yt,nl,txt}}
+async function exportResearch(){
+ if(!dl)return toast('Chế độ xem này không tải file được.');
+ const cls=new Set(CLASSES.map(c=>c.cid)),W=WORKS.filter(w=>cls.has(w.cid)&&w.t>=1&&w.t<=8);if(!W.length)return toast('Chưa có bài nộp nào để xuất.');
+ const used=new Set(),code={};W.forEach(w=>{let c=blindCode(w.id),n=1;while(used.has(c))c=blindCode(w.id+'#'+(n++));used.add(c);code[w.id]=c});
+ const L=x=>x?LVN[x]:'',D=v=>v?new Date(v).toLocaleString('vi-VN'):'',MH=['Quan sát, đọc tranh (GG1)','Thử nghiệm, quy trình (GG2)','Lên ý tưởng (GG3)','Chia sẻ (GG4)'];
+ const head=['Mã chấm mù','Lớp','Mã HS','Họ và tên','Chủ đề','Tên bài','Ngày nộp','Nơi làm','Chất liệu, cách làm','Ý tưởng: hình ảnh chính','Ý tưởng: bối cảnh','Ý tưởng: hành động','Ý tưởng: cảm xúc','Yếu tố trọng tâm','Nguyên lí','Thuyết minh của em','Tự kiểm tra 1','Tự kiểm tra 2','Tự kiểm tra 3','Kể về bài 1: chỗ nổi bật nhất (yếu tố)','Kể về bài 2: cách sắp xếp (nguyên lí)','Kể về bài 3: điều em thích nhất',...MH.map(m=>'Mắt hoạ sĩ · '+m+' (0–3)'),'Mắt hoạ sĩ · tổng (0–12)','Thám tử: số lần chạm sai','Dây phơi: số lần kiểm tra','Câu chốt Xưởng thử (GG2)','Mức GV đánh giá','Nhận xét của GV'];
+ const rows=W.slice().sort((a,b)=>a.cid.localeCompare(b.cid)||a.t-b.t||((stu(a.sid)||{}).stt|0)-((stu(b.sid)||{}).stt|0)).map(w=>{const s=stu(w.sid)||{},R=w.research||{},th=splitThuyet(w),id=R.idea||{},sh=w.share||[],se=w.self||[],mh=R.mh;
+  return [code[w.id],w.cid,w.sid,s.name||'',w.t,w.title||'',D(R.subAt||w.at),w.src==='nha'?'Nộp online':'Thầy cô tải lên',R.way||'',id.hero||'',id.scene||'',id.action||'',id.mood||'',th.yt||'',th.nl||'',th.txt||'',
+   ...[0,1,2].map(i=>se[i]==null?'':se[i]?'Đạt':'Chưa'),...[0,1,2].map(i=>sh[i]||''),...[0,1,2,3].map(i=>mh?mh[i]:''),mh?mh.reduce((a,b)=>a+(b|0),0):'',R.det??'',R.dp??'',R.xt||'',L(w.grade&&w.grade.overall),(w.grade&&w.grade.fb)||'']});
+ const w1=head.map((h,i)=>i===15||i>=19&&i<=21||i===head.length-1||h.startsWith('Câu chốt')?40:Math.max(10,Math.min(26,h.length+2)));
+ const TC=['Ý tưởng riêng','Bố cục, hình ảnh khác lạ','Dùng yếu tố, nguyên lí có chủ đích','Hoàn thiện'];
+ const bHead=['Mã chấm mù','Chủ đề',...[1,2,3].flatMap(n=>[...TC.map(t=>`NC${n} · ${t} (1–4)`),`NC${n} · Có chép mẫu? (C/K)`]),'Hình ảnh chính trong bài (để đếm độ hiếm)','Ghi chú'];
+ const bRows=W.map(w=>[code[w.id],w.t]).sort(()=>Math.random()-.5);
+ const w2=bHead.map((h,i)=>i<2?12:i>=bHead.length-2?40:16);
+ const guide=[['HƯỚNG DẪN DÙNG BẢNG DỮ LIỆU NGHIÊN CỨU'],[''],['1. Trang "Du lieu tu duy": mỗi dòng là một bài nộp, có tên học sinh. Chỉ nhóm nghiên cứu giữ trang này.'],['2. Trang "Phieu cham mu": chỉ có mã chấm mù và chủ đề, thứ tự đã xáo trộn. Tách trang này ra file riêng, gửi người chấm cùng ảnh bài vẽ đã đổi tên theo mã chấm mù.'],['3. Ba người chấm (NC1–NC3) chấm độc lập, không trao đổi, không phải giáo viên dạy lớp.'],['4. Chấm xong, ghép hai trang theo cột "Mã chấm mù" để biết bài của lớp nào, rồi so sánh.'],[''],['RUBRIC 4 TIÊU CHÍ (mỗi tiêu chí 1–4 điểm)'],['Tiêu chí','1 điểm','2 điểm','3 điểm','4 điểm'],
+  ['Ý tưởng riêng','Lấy lại gần nguyên tranh mẫu','Đổi vài chi tiết của tranh mẫu','Ý tưởng riêng, còn quen thuộc','Ý tưởng riêng, bất ngờ, mang dấu ấn của em'],
+  ['Bố cục, hình ảnh khác lạ','Bố cục, hình ảnh giống đa số bài','Có một điểm khác','Nhiều điểm khác','Cách nhìn, cách sắp xếp hiếm gặp'],
+  ['Dùng yếu tố, nguyên lí có chủ đích','Chưa thấy chủ đích','Có nhưng chưa rõ','Rõ, khớp với điều em nói','Rõ, khớp và làm bài nổi bật'],
+  ['Hoàn thiện','Dở dang','Hoàn thành một phần','Hoàn thành','Hoàn thành, chăm chút'],[''],
+  ['Cột "Có chép mẫu?": ghi C nếu bài lấy lại gần nguyên bố cục hoặc nhân vật của tranh mẫu trong SGK hay trên web, K nếu không.'],
+  ['Cột "Hình ảnh chính": ghi 1–3 hình ảnh chính, cách nhau bằng dấu phẩy. Hình ảnh xuất hiện ở hơn 10% số bài tính là phổ biến; bài có nhiều hình ảnh hiếm có điểm độ hiếm cao hơn.'],
+  ['Cột Mắt hoạ sĩ, Thám tử, Dây phơi có từ Apps Script bản 8; cột Câu chốt Xưởng thử có từ bản 9. Bài nộp trước đó để trống.']];
+ const blob=XL([{name:'Du lieu tu duy',rows:[head,...rows],widths:w1,freeze:[4,1],filter:1,bold:[0]},{name:'Phieu cham mu',rows:[bHead,...bRows],widths:w2,freeze:[1,1],bold:[0]},{name:'Huong dan',rows:guide,widths:[34,30,30,30,36],bold:[0,7,8]}]);
+ try{await dl.save({filename:`DuLieuNghienCuu_ArtIsland_${new Date().toLocaleDateString('sv-SE')}.xlsx`,data:blob});toast(`Đã tải bảng: ${rows.length} bài nộp.`)}catch(e){if(e.code!=='declined')toast('Chưa tải được ('+e.code+').')}}
+/* ===================== Tab: Tiêu chí ===================== */
+let tcT=1;
+function vTc(){
+  const C=crit(tcT),saved=CRIT['cd'+tcT];
+  $('#view').innerHTML=`<section class="card f"><div class="sh"><h3>Tiêu chí đánh giá theo chủ đề</h3>${saved&&saved.approved?'<span class="pill lvT">✔ GV đã duyệt</span>':'<span class="pill lvC">Bản nháp soạn từ SGV</span>'}</div>
+   <p class="note" style="margin:0">Một bộ tiêu chí dùng chung cho AI gợi ý và sổ chấm của thầy cô. Căn cứ: yêu cầu cần đạt của Chương trình, cụ thể hoá qua mục tiêu chủ đề trong SGV Mĩ thuật 5.</p>
+   ${topicBar(tcT)}<p style="margin:0"><b>Chủ đề ${tcT}:</b> ${esc(TOPICS[tcT-1])}</p>
+   ${C.items.map((it,i)=>`<div class="crow"><div><b>${i+1}. ${TCN[i]}</b><div class="sub">${TCSUB[i]}</div></div>${LVK.map((k,j)=>`<label class="sub">${LVN[k]}<textarea data-i="${i}" data-j="${j}">${esc(it[j])}</textarea></label>`).join('')}</div>`).join('')}
+   <div class="row end"><button class="btn" id="reset">Khôi phục bản soạn từ SGV</button><button class="btn" id="save">Lưu</button><button class="btn ok" id="appr">✔ Lưu và duyệt</button></div></section>`;
+  bindTopics(t=>{tcT=t;render(true)});
+  const fit=t=>{t.style.height='auto';t.style.height=t.scrollHeight+4+'px'};$$('.crow textarea').forEach(t=>{fit(t);t.addEventListener('input',()=>fit(t))});
+  const collect=ap=>({id:'cd'+tcT,t:tcT,items:[0,1,2].map(i=>[0,1,2].map(j=>$(`[data-i="${i}"][data-j="${j}"]`).value.trim().slice(0,300))),check:C.check,approved:ap,at:Date.now()});
+  const put=async ap=>{try{await db.doc('criteria/cd'+tcT).set(collect(ap));toast(ap?'Đã lưu và duyệt tiêu chí chủ đề '+tcT+'.':'Đã lưu.')}catch(err){toast('Chưa lưu được ('+err.code+').')}};
+  $('#save').onclick=()=>put(!!(saved&&saved.approved));$('#appr').onclick=()=>put(true);
+  $('#reset').onclick=()=>confirmM('Khôi phục tiêu chí chủ đề '+tcT+'?','Phần thầy cô đã sửa sẽ bị thay bằng bản soạn từ SGV.',async()=>{try{await db.doc('criteria/cd'+tcT).delete();toast('Đã khôi phục.')}catch(err){toast('Chưa khôi phục được ('+err.code+').')}});
+}
+
+/* ---- Phát lại quá trình vẽ (time-lapse) cho bài vẽ trên Xưởng vẽ ---- */
+/* ===== ART ENGINE: bộ cọ kiểu Paint, hình, chữ, đổ màu vùng (dùng chung bản HS và bản GV) ===== */
+const BR=[['Cọ thường','🖌️'],['Cọ thư pháp','🖋️'],['Bút thư pháp','✒️'],['Bút phun sơn','💨'],['Cọ sơn dầu','🎨'],['Sáp màu','🖍️'],['Bút dạ','🖊️'],['Bút chì','✏️'],['Cọ màu nước','💧']];
+const BR_WHOLE=[6,8];/* cọ vẽ cả nét một lần (không chồng màu trong cùng một nét) */
+const SH=['Đường thẳng','Hình chữ nhật','Hình tròn','Ngôi sao','Trái tim','Tam giác'];
+const rngOf=seed=>{let x=(seed>>>0)||1;return()=>{x=(x*1664525+1013904223)>>>0;return x/4294967296}};
+const hexRGB=h=>{const n=parseInt(String(h||'#000').slice(1),16);return[n>>16&255,n>>8&255,n&255]};
+const shade=(h,k)=>{const[r,g,b]=hexRGB(h),f=v=>Math.max(0,Math.min(255,Math.round(k<0?v*(1+k):v+(255-v)*k)));return`rgb(${f(r)},${f(g)},${f(b)})`};
+/* vẽ một đoạn nét (a→b, đoạn thứ i) cho các cọ vẽ dần */
+function segPaint(s,c,i){const p=s.p,a=p[Math.max(0,i-1)],b=p[i],w=s.w,al=s.a==null?1:s.a,col=s.col,R=rngOf((s.seed||7)+i*7919);
+  const dx=b[0]-a[0],dy=b[1]-a[1],d=Math.hypot(dx,dy)||.01,ux=dx/d,uy=dy/d,px=-uy,py=ux;c.save();
+  if(s.k==='eraser'){c.globalAlpha=1;c.strokeStyle='#fff';c.lineWidth=w;c.lineCap=c.lineJoin='round';c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0]+.01,b[1]);c.stroke();c.restore();return}
+  c.fillStyle=c.strokeStyle=col;
+  switch(s.b|0){
+    case 1:case 2:{const k=s.b===1?w*.9:w*.75,ang=s.b===1?-Math.PI/4:Math.PI/4,nx=Math.cos(ang)*k,ny=Math.sin(ang)*k;c.globalAlpha=al*(s.b===1?.92:1);
+      c.beginPath();c.moveTo(a[0]+nx,a[1]+ny);c.lineTo(a[0]-nx,a[1]-ny);c.lineTo(b[0]-nx,b[1]-ny);c.lineTo(b[0]+nx,b[1]+ny);c.closePath();c.fill();
+      if(s.b===1){c.globalAlpha=al*.25;c.lineWidth=1.2;c.stroke()}break}
+    case 3:{const Rr=w*1.6,n=Math.ceil((6+w*.9)*(1+d/(w+1)));c.globalAlpha=al*.55;for(let j=0;j<n;j++){const t=R(),an=R()*6.283,rr=Rr*Math.sqrt(R()),x=a[0]+dx*t+Math.cos(an)*rr,y=a[1]+dy*t+Math.sin(an)*rr,sz=R()<.85?1.2:2;c.fillRect(x,y,sz,sz)}break}
+    case 4:{const n=Math.max(4,Math.min(9,Math.round(w/2)+3));c.lineCap='round';for(let j=0;j<n;j++){const o=(j/(n-1)-.5)*w*1.1,jr=rngOf((s.seed||7)+j*131)(),k=(jr-.5)*.35;
+        c.strokeStyle=shade(col,k);c.globalAlpha=al*(.55+jr*.4);c.lineWidth=Math.max(1,w/n*1.6);c.beginPath();c.moveTo(a[0]+px*o,a[1]+py*o);c.lineTo(b[0]+px*o,b[1]+py*o);c.stroke()}break}
+    case 5:{const n=Math.ceil(d*w*.35)+3;c.globalAlpha=al*.8;for(let j=0;j<n;j++){const t=R(),o=(R()-.5)*w,x=a[0]+dx*t+px*o,y=a[1]+dy*t+py*o;if(R()<.78)c.fillRect(x,y,1.6,1.6)}break}
+    case 7:{c.globalAlpha=al*.6;c.lineWidth=Math.max(1,w*.45);c.lineCap='round';c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0]+.01,b[1]);c.stroke();
+      c.globalAlpha=al*.35;const n=Math.ceil(d*.8)+1;for(let j=0;j<n;j++){const t=R(),o=(R()-.5)*w*.9;c.fillRect(a[0]+dx*t+px*o,a[1]+dy*t+py*o,1,1)}break}
+    default:{c.globalAlpha=al;c.lineWidth=w;c.lineCap=c.lineJoin='round';c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0]+.01,b[1]);c.stroke()}}
+  c.restore()}
+/* vẽ cả nét một lần: bút dạ, màu nước */
+function wholePaint(s,c){const p=s.p,w=s.w,al=s.a==null?1:s.a;c.save();c.strokeStyle=s.col;c.lineJoin='round';
+  const pl=()=>{c.beginPath();c.moveTo(p[0][0],p[0][1]);p.slice(1).forEach(q=>c.lineTo(q[0],q[1]));if(p.length===1)c.lineTo(p[0][0]+.1,p[0][1]);c.stroke()};
+  if((s.b|0)===6){c.globalAlpha=al*.55;c.lineWidth=w*1.5;c.lineCap='square';pl()}
+  else{c.lineCap='round';c.shadowColor=s.col;c.shadowBlur=w*.9;c.globalAlpha=al*.22;c.lineWidth=w*1.6;pl();c.shadowBlur=0;c.globalAlpha=al*.16;c.lineWidth=w*.9;pl();c.globalAlpha=al*.12;c.lineWidth=w*1.75;c.globalCompositeOperation='multiply';pl()}
+  c.restore()}
+function shapePath(s,c){const[a,b]=[s.p[0],s.p[s.p.length-1]],x=a[0],y=a[1],w=b[0]-x,h=b[1]-y;c.beginPath();
+  if(s.k==='Đường thẳng'){c.moveTo(x,y);c.lineTo(b[0],b[1])}else if(s.k==='Hình chữ nhật')c.rect(x,y,w,h);
+  else if(s.k==='Hình tròn')c.ellipse(x+w/2,y+h/2,Math.abs(w/2)||.5,Math.abs(h/2)||.5,0,0,7);
+  else if(s.k==='Tam giác'){c.moveTo(x+w/2,y);c.lineTo(x+w,y+h);c.lineTo(x,y+h);c.closePath()}
+  else if(s.k==='Ngôi sao'){const cx=x+w/2,cy=y+h/2,rx=Math.abs(w/2),ry=Math.abs(h/2);for(let i=0;i<10;i++){const k=i%2?.42:1,t=-Math.PI/2+i*Math.PI/5;c.lineTo(cx+rx*k*Math.cos(t),cy+ry*k*Math.sin(t))}c.closePath()}
+  else{const cx=x+w/2,X=v=>cx+v*Math.abs(w)/2,Y=v=>y+v*Math.abs(h);c.moveTo(cx,Y(.3));c.bezierCurveTo(X(.1),Y(-.08),X(1.05),Y(.05),X(1),Y(.35));c.bezierCurveTo(X(.95),Y(.65),cx+Math.abs(w)*.1,Y(.8),cx,Y(1));c.bezierCurveTo(cx-Math.abs(w)*.1,Y(.8),X(-.95),Y(.65),X(-1),Y(.35));c.bezierCurveTo(X(-1.05),Y(.05),X(-.1),Y(-.08),cx,Y(.3));c.closePath()}}
+const isShape=s=>SH.includes(s.k);
+function shRot(s,c){if(!s.r)return;const a=s.p[0],b=s.p[s.p.length-1],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;c.translate(mx,my);c.rotate(s.r*Math.PI/180);c.translate(-mx,-my)}
+function shapePaint(s,c){c.save();shRot(s,c);shapePath(s,c);if(s.fill&&s.k!=='Đường thẳng'){c.globalAlpha=(s.a==null?1:s.a);c.fillStyle=s.fc||s.col;c.fill()}c.globalAlpha=(s.a==null?1:s.a);c.strokeStyle=s.col;c.lineWidth=s.w;c.lineCap=c.lineJoin='round';c.stroke();c.restore()}
+function shapeBox(s){const[a,b]=[s.p[0],s.p[s.p.length-1]],pad=s.w/2+4;return[Math.min(a[0],b[0])-pad,Math.min(a[1],b[1])-pad,Math.max(a[0],b[0])+pad,Math.max(a[1],b[1])+pad]}
+/* đổ màu vùng khép kín (giới hạn bởi viền), như Paint */
+function floodFill(c,x,y,col,al){x=Math.round(x);y=Math.round(y);const W=c.canvas.width,H=c.canvas.height;if(x<0||y<0||x>=W||y>=H)return;
+  const img=c.getImageData(0,0,W,H),d=img.data,i0=(y*W+x)*4,t=[d[i0],d[i0+1],d[i0+2]],[r,g,b]=hexRGB(col),A=al==null?1:al,TOL=96,seen=new Uint8Array(W*H);
+  const near=i=>Math.abs(d[i]-t[0])+Math.abs(d[i+1]-t[1])+Math.abs(d[i+2]-t[2])<=TOL;
+  if(Math.abs(t[0]-r)+Math.abs(t[1]-g)+Math.abs(t[2]-b)<6&&A>=1)return;
+  const st=[[x,y]];while(st.length){let[sx,sy]=st.pop();let lx=sx;while(lx>0&&!seen[sy*W+lx-1]&&near((sy*W+lx-1)*4))lx--;let rx=sx;while(rx<W-1&&!seen[sy*W+rx+1]&&near((sy*W+rx+1)*4))rx++;
+    for(let xx=lx;xx<=rx;xx++){const k=sy*W+xx;if(seen[k])continue;seen[k]=1;const q=k*4;d[q]=d[q]*(1-A)+r*A;d[q+1]=d[q+1]*(1-A)+g*A;d[q+2]=d[q+2]*(1-A)+b*A;
+      if(sy>0&&!seen[k-W]&&near((k-W)*4))st.push([xx,sy-1]);if(sy<H-1&&!seen[k+W]&&near((k+W)*4))st.push([xx,sy+1])}}
+  /* nới 1px để lấp viền răng cưa */
+  const out=new Uint8Array(seen);for(let yy=1;yy<H-1;yy++)for(let xx=1;xx<W-1;xx++){const k=yy*W+xx;if(seen[k])continue;if(seen[k-1]||seen[k+1]||seen[k-W]||seen[k+W]){const q=k*4,dd=Math.abs(d[q]-t[0])+Math.abs(d[q+1]-t[1])+Math.abs(d[q+2]-t[2]);if(dd<=TOL*2.2){out[k]=1;d[q]=d[q]*(1-A*.7)+r*A*.7;d[q+1]=d[q+1]*(1-A*.7)+g*A*.7;d[q+2]=d[q+2]*(1-A*.7)+b*A*.7}}}
+  c.putImageData(img,0,0);return out}
+/* vẽ lại một thao tác bất kì (dùng cho vẽ lại, time-lapse, bản giáo viên) */
+function paint(s,c){if(!s)return;c.save();
+  if(s.k==='text'){c.globalAlpha=s.a==null?1:s.a;c.fillStyle=s.col;c.font=`bold ${s.sz}px sans-serif`;c.fillText(s.s,s.x,s.y)}
+  else if(s.k==='flood'&&s.r){c.globalAlpha=s.a==null?1:s.a;c.fillStyle=s.col;const R=s.r;for(let i=0;i<R.length;i+=3)c.fillRect(R[i+1],R[i],R[i+2],1)}
+  else if(s.k==='flood'){floodFill(c,s.x,s.y,s.col,s.a)}
+  else if(s.k==='fill'){c.globalAlpha=.35;c.fillStyle=s.col;c.fillRect(0,0,c.canvas.width,c.canvas.height)}
+  else if(s.k==='flip'){const t=document.createElement('canvas');t.width=c.canvas.width;t.height=c.canvas.height;t.getContext('2d').drawImage(c.canvas,0,0);c.setTransform(-1,0,0,1,c.canvas.width,0);c.drawImage(t,0,0)}
+  else if(isShape(s))shapePaint(s,c);
+  else if(s.k==='brush'&&BR_WHOLE.includes(s.b|0))wholePaint(s,c);
+  else if(s.k==='brush'||s.k==='eraser'){const n=s.p.length;if(n===1)segPaint({...s,p:[s.p[0],[s.p[0][0]+.5,s.p[0][1]]]},c,1);else for(let i=1;i<n;i++)segPaint(s,c,i)}
+  c.restore()}
+/* màu nền (đổ màu vùng nền) luôn nằm dưới mọi hình */
+const bgFirst=a=>a.filter(s=>s&&s.bg).concat(a.filter(s=>!(s&&s.bg)));
+let tlTimer;function playTL(strokes,c,done){strokes=bgFirst(strokes);clearInterval(tlTimer);const n=strokes.length;if(!n)return;c.setTransform(1,0,0,1,0,0);c.fillStyle='#fff';c.fillRect(0,0,1000,625);let i=0;const step=Math.max(1,Math.ceil(n/(12*20)));tlTimer=setInterval(()=>{for(let k=0;k<step&&i<n;k++)paint(strokes[i++],c);if(i>=n){clearInterval(tlTimer);done&&done()}},50)}
+
+</script>

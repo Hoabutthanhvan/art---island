@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Art Island – Nộp bài và Hộp thư</title>
+<style>
+  [hidden]{display:none!important}
+  body{margin:0;font:16px/1.5 "Segoe UI",system-ui,sans-serif;background:#d7effc;color:#1d4e6e}
+  .w{max-width:520px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+  .w.wide{max-width:980px}
+  .c{background:#fff;border-radius:18px;padding:16px;border:3px solid #fff;box-shadow:0 6px 18px #1d4e6e22}
+  h1{font-size:22px;margin:0;color:#c2410c}
+  h2{font-size:17px;margin:0 0 4px}
+  label{display:flex;flex-direction:column;gap:4px;font-weight:700;margin:8px 0}
+  input,select,textarea{font:inherit;border:2px solid #cfe3ea;border-radius:12px;padding:8px}
+  textarea{resize:vertical;min-height:84px}
+  .pick{display:block;text-align:center;padding:18px;border:3px dashed #9ccbe3;border-radius:16px;cursor:pointer;font-weight:800}
+  img,video{max-width:100%;border-radius:12px;display:block;margin:8px auto}
+  button{font:inherit;font-weight:800;border:0;border-radius:999px;padding:12px 20px;background:#ff7a59;color:#fff;width:100%;cursor:pointer}
+  button.ghost{background:#eef6fa;color:#1d4e6e;padding:8px 14px;width:auto}
+  button:disabled{opacity:.5}
+  .ok{background:#d5f5e3;color:#0b6b3a;border-radius:12px;padding:12px;font-weight:700}
+  .err{background:#fde7e4;color:#b42318;border-radius:12px;padding:12px}
+  .bar{height:10px;background:#e3f0f6;border-radius:99px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;width:0;background:#ff7a59;transition:width .3s}
+  small{color:#5d7f93;font-weight:400}
+  .tabs{display:flex;gap:6px;margin-top:10px}
+  .tabs button{flex:1;background:#eef6fa;color:#1d4e6e;padding:10px 6px;font-size:15px;position:relative}
+  .tabs button.on{background:#1d4e6e;color:#fff}
+  @media(max-width:440px){.tabs{gap:4px}.tabs button{font-size:12.5px;padding:8px 2px}}
+  .dot{position:absolute;top:-6px;right:-2px;background:#e11d48;color:#fff;border-radius:99px;font-size:12px;min-width:20px;height:20px;line-height:20px;padding:0 5px}
+  .msg{border-left:5px solid #ff7a59;padding:10px 12px;border-radius:12px;background:#fff7f3;margin:8px 0}
+  .msg.new{box-shadow:0 0 0 2px #ff7a59 inset}
+  .msg .t{font-weight:800}
+  .lv{display:inline-block;border-radius:99px;padding:2px 10px;font-weight:800;font-size:13px}
+  .lvT{background:#d5f5e3;color:#0b6b3a}.lvH{background:#e0efff;color:#1d4ed8}.lvC{background:#fef3c7;color:#92400e}
+  .row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:4px 0}
+  .ph{display:flex;gap:10px;align-items:flex-start}.ph img{width:84px;height:84px;object-fit:cover;margin:0;flex:none}
+  .fb{background:#f3f9fc;border-radius:12px;padding:10px;margin-top:8px}
+  .ck{flex-direction:row;align-items:flex-start;gap:8px;font-weight:600}.ck input{width:20px;height:20px;margin-top:3px;flex:none}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.chips button{width:auto;padding:6px 12px;font-size:14px;background:#eef6fa;color:#1d4e6e}.chips button.on{background:#ff7a59;color:#fff}
+  .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+  .art{background:#fff;border:3px solid #fff;border-radius:16px;box-shadow:0 4px 12px #1d4e6e22;padding:0;color:#1d4e6e;text-align:left;overflow:hidden;font-weight:600;cursor:pointer}
+  .art img{width:100%;aspect-ratio:4/3;object-fit:cover;margin:0;border-radius:0;background:#f3f9fc}
+  .art div{padding:8px 10px}.art b{display:block;font-size:14px;line-height:1.3}.art small{font-size:12.5px}
+  .mod{position:fixed;inset:0;background:#0d2b3dcc;display:grid;place-items:center;padding:12px;z-index:9}
+  .mbox{background:#fff;border-radius:20px;max-width:760px;width:100%;max-height:94vh;overflow:auto;padding:16px}
+  .mbox img{max-height:62vh;object-fit:contain;background:#f3f9fc}
+  .heart{width:auto;background:#fff1f2;color:#be123c;padding:8px 16px}.heart.on{background:#be123c;color:#fff}
+  .lg{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;margin-top:6px}.lg i{display:inline-block;width:18px;height:4px;border-radius:2px;vertical-align:middle;margin-right:4px}
+  .pin{letter-spacing:.4em;font-size:22px;text-align:center}
+  .info{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:4px 0}.info b{font-weight:700}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="c"><div class="row"><h1>🏝️ Art Island</h1><button class="ghost" id="out" hidden>Đăng xuất</button></div><small id="who">Mĩ thuật 5</small>
+    <div class="tabs" id="tabs" hidden>
+      <button data-v="nop">📤 Nộp bài</button>
+      <button data-v="inbox">🔔 Hộp thư<span class="dot" id="dot" hidden></span></button>
+      <button data-v="tienbo">📈 Tiến bộ</button>
+      <button data-v="tl">🖼️ Triển lãm</button>
+    </div>
+  </div>
+
+  <!-- ===== ĐĂNG NHẬP ===== -->
+  <div id="vLogin" hidden>
+    <div class="c">
+      <h2>Em đăng nhập nhé</h2>
+      <p><small>Dùng <b>mã số</b> và <b>mã PIN 6 số</b> in trên thẻ thầy cô phát.</small></p>
+      <label>Mã số trên thẻ <input id="lSid" maxlength="20" placeholder="VD: 5A1-07" autocomplete="username"></label>
+      <label>Mã PIN <input id="lPin" class="pin" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="••••••" autocomplete="current-password"></label>
+      <button id="lGo">Vào Art Island</button>
+      <div id="lMsg"></div>
+      <p><small>Quên PIN? Em nhờ thầy cô cấp lại mã PIN mới nhé.</small></p>
+    </div>
+  </div>
+
+  <!-- ===== NỘP BÀI ===== -->
+  <div id="vNop" hidden>
+    <div class="c">
+      <div class="info"><b>Họ và tên</b><span id="iName"></span><b>Mã số</b><span id="iSid"></span><b>Lớp</b><span id="iCls"></span></div>
+      <label>Chủ đề <select id="t"></select></label>
+      <label>Tên sản phẩm <input id="title" maxlength="80"></label>
+    </div>
+    <div class="c">
+      <h2>1. Ảnh sản phẩm <small>(bắt buộc)</small></h2>
+      <label class="pick" for="f">📷 Chụp hoặc chọn ảnh sản phẩm</label>
+      <input type="file" id="f" accept="image/*" hidden>
+      <img id="pv" hidden alt="Ảnh sản phẩm">
+      <div id="fmsg"></div>
+    </div>
+    <div class="c">
+      <h2>2. Thuyết minh <small>(em viết vài câu)</small></h2>
+      <label><small>Chỗ nào trong bài em làm nổi bật nhất? Em sắp xếp các hình thế nào? Em thích nhất điều gì?</small>
+        <textarea id="txt" maxlength="600" placeholder="VD: Em tô chiếc diều màu đỏ thật tươi và vẽ to nhất để ai nhìn cũng thấy ngay…"></textarea></label>
+    </div>
+    <div class="c">
+      <h2>3. Video sản phẩm 3D <small>(nếu là mô hình, đồ vật)</small></h2>
+      <small>Quay chậm một vòng quanh sản phẩm, <b>không quá <span class="vs"></span> giây</b>, dưới <span class="vmb"></span> MB.</small>
+      <label class="pick" for="v" style="margin-top:8px">🎬 Quay hoặc chọn video</label>
+      <input type="file" id="v" accept="video/*" hidden>
+      <video id="vv" hidden controls playsinline muted></video>
+      <div id="vmsg"></div>
+      <button class="ghost" id="vdel" hidden>✕ Bỏ video</button>
+    </div>
+    <div class="c">
+      <label class="ck"><input type="checkbox" id="show"><span>Em muốn đưa bài này lên <b>🖼️ Triển lãm lớp</b> cho các bạn cùng xem. (Không đánh dấu thì chỉ thầy cô xem được bài.)</span></label>
+      <button id="send" disabled>Gửi bài</button>
+      <div class="bar" id="bar" hidden><i></i></div>
+      <div id="msg"></div>
+    </div>
+  </div>
+
+  <!-- ===== HỘP THƯ ===== -->
+  <div id="vInbox" hidden>
+    <div class="c"><div class="row"><h2>🔔 Hộp thư của em</h2><button class="ghost" id="reload">↻ Tải lại</button></div><div id="inboxBody"><small>Đang mở hộp thư…</small></div></div>
+  </div>
+
+  <!-- ===== TRIỂN LÃM LỚP ===== -->
+  <div id="vTl" hidden>
+    <div class="c"><div class="row"><h2>🖼️ Triển lãm lớp <span id="tlCls"></span></h2><button class="ghost" id="tlRe">↻ Tải lại</button></div>
+      <small>Sản phẩm các bạn trong lớp đã nộp và đồng ý trưng bày. Chạm vào một bức để xem to và thả tim.</small>
+      <div id="tlBody"><small>Đang mở phòng triển lãm…</small></div></div>
+  </div>
+  <div id="tlM" class="mod" hidden><div class="mbox" id="tlMB"></div></div>
+
+  <!-- ===== TIẾN BỘ ===== -->
+  <div id="vTienbo" hidden>
+    <div class="c"><h2>📈 Biểu đồ tiến bộ của em</h2><small>Mức đạt theo tuần, từ các phiếu thầy cô đã chấm.</small><div id="chart"></div></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/ai-common.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const esc = AI.esc, CFG = AI.cfg;
+  if (!window.supabase) { document.querySelector('.w').insertAdjacentHTML('beforeend', '<div class="c err">Chưa tải được thư viện kết nối. Em kiểm tra mạng rồi tải lại trang nhé.</div>'); return; }
+  const sb = AI.client('ai-hs');
+  const P = Object.fromEntries(new URLSearchParams(location.search));
+  let meta = {};
+  try { meta = P.d ? JSON.parse(decodeURIComponent(escape(atob(P.d)))) : {}; } catch (e) { meta = {}; }
+  const T = ['Yếu tố tạo hình','Hình tượng anh hùng dân tộc','Gia đình','Hoạt động ở trường em','Việc làm bình dị mà cao quý','Cảnh sắc quê hương','Việt Nam đất nước, con người','Vì một thế giới hoà bình'];
+  const LV = { T: 'Hoàn thành tốt', H: 'Hoàn thành', C: 'Chưa hoàn thành' }, LVS = { T: 'HTT', H: 'HT', C: 'CHT' }, LVN = { T: 3, H: 2, C: 1 };
+  const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+  document.querySelectorAll('.vs').forEach(e => e.textContent = CFG.maxVideoSeconds);
+  document.querySelectorAll('.vmb').forEach(e => e.textContent = Math.round(CFG.maxVideoBytes / 1048576));
+
+  let ME = null;   // {sid, name, class_id}
+  let VIEW = ['inbox', 'tienbo', 'tl'].includes(P.view) ? P.view : 'nop';
+
+  /* ---------- đăng nhập ---------- */
+  $('lSid').value = AI.normSid(P.sid || meta.sid || store.get('ai_box_sid', '') || '');
+  async function boot() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return showLogin();
+    const { data, error } = await sb.from('students').select('sid,name,class_id').eq('user_id', session.user.id).maybeSingle();
+    if (error || !data) { await sb.auth.signOut(); return showLogin(error ? AI.errText(error) : 'Tài khoản này không phải tài khoản học sinh.'); }
+    ME = data; store.set('ai_box_sid', ME.sid);
+    if (meta.sid && AI.normSid(meta.sid) !== ME.sid) {
+      document.querySelector('#vNop .c').insertAdjacentHTML('afterbegin', `<div class="err" style="margin-bottom:8px">Bài này được gửi từ máy của mã số <b>${esc(AI.normSid(meta.sid))}</b>, nhưng em đang đăng nhập bằng mã <b>${esc(ME.sid)}</b>. Nếu không phải bài của em, hãy đăng xuất.</div>`);
+    }
+    $('who').textContent = ME.name + ' · Mã số ' + ME.sid + ' · Lớp ' + ME.class_id;
+    $('iName').textContent = ME.name; $('iSid').textContent = ME.sid; $('iCls').textContent = ME.class_id;
+    $('tabs').hidden = false; $('out').hidden = false; $('vLogin').hidden = true;
+    show(VIEW); loadBox(true);
+  }
+  function showLogin(msg) {
+    ME = null; $('tabs').hidden = true; $('out').hidden = true;
+    ['vNop', 'vInbox', 'vTienbo', 'vTl'].forEach(v => $(v).hidden = true);
+    $('vLogin').hidden = false; $('lMsg').innerHTML = msg ? `<div class="err">${esc(msg)}</div>` : '';
+  }
+  $('lGo').onclick = async () => {
+    const sid = AI.normSid($('lSid').value), pin = $('lPin').value.trim();
+    if (!/^[A-Z0-9]{1,12}-\d{2}$/.test(sid)) return $('lMsg').innerHTML = '<div class="err">Em gõ mã số đúng như trên thẻ, ví dụ 5A1-07.</div>';
+    if (!/^\d{6}$/.test(pin)) return $('lMsg').innerHTML = '<div class="err">Mã PIN gồm 6 chữ số.</div>';
+    $('lGo').disabled = true; $('lMsg').innerHTML = '<small>Đang đăng nhập…</small>';
+    const { error } = await sb.auth.signInWithPassword({ email: AI.emailOf(sid), password: pin });
+    $('lGo').disabled = false;
+    if (error) return $('lMsg').innerHTML = `<div class="err">${esc(AI.errText(error))}</div>`;
+    $('lPin').value = ''; boot();
+  };
+  $('lPin').onkeydown = e => { if (e.key === 'Enter') $('lGo').click(); };
+  $('out').onclick = async () => { await sb.auth.signOut(); BOX = null; TL = null; showLogin(); };
+
+  /* ---------- điều hướng ---------- */
+  let BOX = null;
+  function show(v) {
+    VIEW = v;
+    $('vNop').hidden = v !== 'nop'; $('vInbox').hidden = v !== 'inbox'; $('vTienbo').hidden = v !== 'tienbo'; $('vTl').hidden = v !== 'tl';
+    document.querySelector('.w').classList.toggle('wide', v === 'tl');
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    if (v === 'tl') openTl();
+    if (v === 'inbox') { if (BOX) drawInbox(); else loadBox(); }
+    if (v === 'tienbo') { if (BOX) drawChart(); else loadBox(); }
+  }
+  document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => show(b.dataset.v));
+  $('reload').onclick = () => loadBox();
+
+  /* ---------- hộp thư ---------- */
+  const seenKey = () => 'ai_seen_' + ME.sid;
+  function unread() { const seen = new Set(store.get(seenKey(), [])); return BOX ? BOX.phieu.concat(BOX.tb).filter(x => !seen.has(x.id)).length : 0; }
+  function badge() { const n = unread(), d = $('dot'); d.hidden = !n; d.textContent = n; document.title = (n ? '(' + n + ') ' : '') + 'Art Island – Hộp thư'; }
+  async function loadBox(quiet) {
+    if (!quiet) { $('inboxBody').innerHTML = '<small>Đang mở hộp thư…</small>'; $('chart').innerHTML = '<small>Đang tải…</small>'; }
+    try {
+      const [f, a] = await Promise.all([
+        sb.from('feedback').select('id,topic,title,levels,overall,comment,criteria,thumb,created_at').order('created_at', { ascending: false }).limit(80),
+        sb.from('announcements').select('id,title,body,created_at').order('created_at', { ascending: false }).limit(20)
+      ]);
+      if (f.error) throw f.error; if (a.error) throw a.error;
+      BOX = {
+        phieu: f.data.map(x => ({ id: x.id, t: x.topic, title: x.title, lv: x.levels || [], overall: x.overall, fb: x.comment, crit: x.criteria, thumb: x.thumb, at: x.created_at })),
+        tb: a.data.map(x => ({ id: x.id, title: x.title, body: x.body, at: x.created_at }))
+      };
+      badge(); if (VIEW === 'inbox') drawInbox(); if (VIEW === 'tienbo') drawChart();
+    } catch (err) {
+      const h = `<div class="err">Chưa mở được hộp thư: ${esc(AI.errText(err))}</div>`;
+      if (!quiet || VIEW === 'inbox') $('inboxBody').innerHTML = h; if (!quiet || VIEW === 'tienbo') $('chart').innerHTML = h;
+    }
+  }
+  const day = s => { const d = new Date(s); return isNaN(d) ? '' : d.toLocaleDateString('vi-VN'); };
+  function drawInbox() {
+    const seen = new Set(store.get(seenKey(), []));
+    const latest = {}; BOX.phieu.forEach(p => { if (!latest[p.t]) latest[p.t] = p; });
+    const items = BOX.tb.map(x => ({ k: 'tb', at: x.at, x })).concat(Object.values(latest).map(x => ({ k: 'p', at: x.at, x })))
+      .sort((a, b) => String(b.at).localeCompare(String(a.at)));
+    $('inboxBody').innerHTML = items.length ? items.map(({ k, x }) => {
+      const nw = !seen.has(x.id) ? ' new' : '';
+      if (k === 'tb') return `<div class="msg${nw}"><div class="t">📣 ${esc(x.title)}</div><small>${day(x.at)}${nw ? ' · Mới' : ''}</small><div>${esc(x.body)}</div></div>`;
+      const crit = (x.crit || ['Nhận biết', 'Thể hiện', 'Chia sẻ']);
+      return `<div class="msg${nw}"><div class="ph">${x.thumb && /^data:image\//.test(x.thumb) ? `<img src="${esc(x.thumb)}" alt="">` : ''}<div><div class="t">📝 Phiếu đánh giá · Chủ đề ${x.t}</div><small>${esc(T[x.t - 1] || '')}${x.title ? ' · ' + esc(x.title) : ''} · ${day(x.at)}${nw ? ' · Mới' : ''}</small>
+        <div class="row" style="justify-content:flex-start"><b>Mức đạt:</b> <span class="lv lv${esc(x.overall)}">${esc(LV[x.overall] || '')}</span></div></div></div>
+        ${(x.lv || []).map((l, i) => l ? `<div class="row"><span>${i + 1}. ${esc(crit[i])}</span><span class="lv lv${esc(l)}">${LVS[l] || ''}</span></div>` : '').join('')}
+        ${x.fb ? `<div class="fb">💬 ${esc(x.fb)}</div>` : ''}</div>`;
+    }).join('') : '<small>Hộp thư chưa có gì. Khi thầy cô chấm xong bài, phiếu đánh giá sẽ hiện ở đây.</small>';
+    store.set(seenKey(), BOX.phieu.concat(BOX.tb).map(x => x.id)); setTimeout(badge, 1500);
+  }
+
+  /* ---------- biểu đồ tiến bộ ---------- */
+  function monday(s) { const d = new Date(s); if (isNaN(d)) return null; const w = (d.getDay() + 6) % 7; d.setDate(d.getDate() - w); d.setHours(0, 0, 0, 0); return d; }
+  function drawChart() {
+    const latest = {}; BOX.phieu.forEach(p => { if (!latest[p.t]) latest[p.t] = p; });
+    const wk = {};
+    Object.values(latest).forEach(p => { const m = monday(p.at); if (!m) return; const k = m.getTime(); (wk[k] = wk[k] || []).push(p); });
+    const keys = Object.keys(wk).map(Number).sort((a, b) => a - b);
+    if (!keys.length) { $('chart').innerHTML = '<p><small>Chưa có phiếu đánh giá nào. Biểu đồ sẽ hiện khi thầy cô chấm bài đầu tiên.</small></p>'; return; }
+    const avg = (arr, f) => { const v = arr.map(f).filter(x => x); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+    const series = [
+      { name: 'Mức đạt chủ đề', color: '#ff7a59', w: 3.5, f: p => LVN[p.overall] },
+      { name: 'Nhận biết', color: '#2f80ed', w: 1.8, f: p => LVN[(p.lv || [])[0]], dash: '5 4', dy: -5 },
+      { name: 'Thể hiện', color: '#16a34a', w: 1.8, f: p => LVN[(p.lv || [])[1]], dash: '5 4' },
+      { name: 'Chia sẻ', color: '#8e44ad', w: 1.8, f: p => LVN[(p.lv || [])[2]], dash: '5 4', dy: 5 }
+    ];
+    const W = 460, H = 230, L = 52, R = 36, Tp = 20, B = 46, n = keys.length;
+    const X = i => n === 1 ? (L + W - R) / 2 : L + i * (W - L - R) / (n - 1), Y = v => Tp + (3 - v) * (H - Tp - B) / 2;
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Biểu đồ tiến bộ theo tuần" style="font:12px system-ui">`;
+    [[3, 'HTT'], [2, 'HT'], [1, 'CHT']].forEach(([v, t]) => { svg += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#dbe9f1"/><text x="${L - 8}" y="${Y(v) + 4}" text-anchor="end" fill="#5d7f93" font-weight="700">${t}</text>`; });
+    keys.forEach((k, i) => { const d = new Date(k); svg += `<text x="${X(i)}" y="${H - B + 18}" text-anchor="middle" fill="#5d7f93">Tuần ${('0' + d.getDate()).slice(-2)}/${('0' + (d.getMonth() + 1)).slice(-2)}</text>`; });
+    series.forEach(s => {
+      const pts = keys.map((k, i) => { const v = avg(wk[k], s.f); return v ? [X(i), Y(v) + (s.dy || 0)] : null; }).filter(Boolean);
+      if (pts.length > 1) svg += `<polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="${s.color}" stroke-width="${s.w}" ${s.dash ? `stroke-dasharray="${s.dash}"` : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+      pts.forEach(p => svg += `<circle cx="${p[0]}" cy="${p[1]}" r="${s.w > 2 ? 5 : 3}" fill="${s.color}"/>`);
+    });
+    svg += '</svg>';
+    const lastV = avg(wk[keys[n - 1]], series[0].f), firstV = avg(wk[keys[0]], series[0].f);
+    const note = n < 2 ? 'Mới có phiếu của 1 tuần. Khi có thêm phiếu, đường tiến bộ sẽ hiện rõ hơn.'
+      : lastV > firstV ? '🌟 Mức đạt của em đang đi lên. Cố gắng giữ vững nhé!'
+      : lastV < firstV ? '💪 Tuần gần đây mức đạt thấp hơn. Em đọc lại lời góp ý của thầy cô trong Hộp thư nhé.'
+      : '🙂 Mức đạt của em đang ổn định. Thử một ý tưởng mới ở chủ đề sau nhé!';
+    $('chart').innerHTML = svg + `<div class="lg">${series.map(s => `<span><i style="background:${s.color}"></i>${s.name}</span>`).join('')}</div><p class="fb">${note}</p>`;
+  }
+
+  /* ---------- nộp bài ---------- */
+  $('t').innerHTML = T.map((n, i) => `<option value="${i + 1}">Chủ đề ${i + 1}: ${n}</option>`).join('');
+  if (meta.title) $('title').value = meta.title;
+  if (meta.t) $('t').value = meta.t;
+  if (meta.thuyet && meta.thuyet.txt) $('txt').value = meta.thuyet.txt;
+  let IMG = null, vfile = null;
+  const bar = p => { $('bar').hidden = false; $('bar').firstElementChild.style.width = Math.round(p * 100) + '%'; };
+
+  $('f').onchange = async e => {
+    const file = e.target.files[0]; if (!file) return;
+    $('fmsg').innerHTML = '<small>Đang nén ảnh…</small>'; $('send').disabled = true;
+    try {
+      IMG = await AI.compressImage(file);
+      $('pv').src = IMG.preview; $('pv').hidden = false; $('send').disabled = false;
+      $('fmsg').innerHTML = `<small>✔ Ảnh đã nén: ${(file.size / 1048576).toFixed(1)} MB → ${(IMG.main.blob.size / 1048576).toFixed(2)} MB</small>`;
+    } catch (err) { IMG = null; $('fmsg').innerHTML = `<div class="err">Chưa đọc được ảnh này. Em chụp lại hoặc chọn ảnh khác nhé.</div>`; }
+  };
+
+  const clearVid = () => { vfile = null; $('v').value = ''; $('vv').hidden = true; $('vv').removeAttribute('src'); $('vdel').hidden = true; };
+  $('vdel').onclick = () => { clearVid(); $('vmsg').innerHTML = ''; };
+  $('v').onchange = async e => {
+    const file = e.target.files[0]; if (!file) return;
+    $('vmsg').innerHTML = '<small>Đang kiểm tra video…</small>';
+    const r = await AI.checkVideo(file);
+    if (!r.ok) { clearVid(); $('vmsg').innerHTML = `<div class="err">${esc(r.msg)}</div>`; return; }
+    vfile = file; const v = $('vv'); v.src = URL.createObjectURL(file); v.hidden = false; $('vdel').hidden = false;
+    $('vmsg').innerHTML = '<small>✔ Video ' + (r.duration ? Math.round(r.duration) + ' giây, ' : '') + (file.size / 1048576).toFixed(1) + ' MB</small>';
+  };
+
+  const given = n => { const p = String(n || '').trim().split(/\s+/); return p[p.length - 1] || 'Bạn nhỏ'; };
+  /** Dữ liệu nghiên cứu đi kèm bài nộp (giữ nguyên các trường của bản Apps Script) */
+  function research(th) {
+    const m = meta, cut = (s, n) => String(s || '').slice(0, n);
+    return {
+      app: 'art-island', v: 5,
+      check: Array.isArray(m.check) ? m.check.slice(0, 3) : null,
+      checkText: Array.isArray(m.checkText) ? m.checkText.slice(0, 3).map(x => cut(x, 160)) : null,
+      thuyet: { yt: cut(th.yt, 40), nl: cut(th.nl, 80), txt: cut(th.txt, 600) },
+      share: Array.isArray(m.share) ? m.share.slice(0, 3).map(x => cut(x, 300)) : null,
+      way: cut(m.way, 40),
+      idea: m.idea && typeof m.idea === 'object' ? ['hero', 'scene', 'action', 'mood'].reduce((o, k) => (o[k] = cut(m.idea[k], 80), o), {}) : null,
+      mh: Array.isArray(m.mh) ? m.mh.slice(0, 4).map(x => Math.max(0, Math.min(3, parseInt(x, 10) || 0))) : null,
+      det: m.det != null && m.det !== '' ? Math.max(0, parseInt(m.det, 10) || 0) : null,
+      dp: m.dp != null && m.dp !== '' ? Math.max(0, parseInt(m.dp, 10) || 0) : null,
+      xt: cut(m.xt, 300), by: cut(m.by, 60), lesson: m.lesson != null ? m.lesson : null
+    };
+  }
+  const upload = async (bucket, path, body, type) => {
+    const { error } = await sb.storage.from(bucket).upload(path, body, { contentType: type, upsert: false, cacheControl: '3600' });
+    if (error) throw error; return path;
+  };
+
+  $('send').onclick = async () => {
+    if (!ME) return showLogin();
+    if (!IMG) { $('msg').innerHTML = '<div class="err">Em chọn ảnh sản phẩm trước nhé!</div>'; return; }
+    $('send').disabled = true; $('msg').textContent = 'Đang gửi…'; bar(0.05);
+    const t = +$('t').value, ts = Date.now(), base = `${ME.sid}/CD${t}_${ts}`, show = $('show').checked;
+    const th = Object.assign({}, meta.thuyet || {}, { txt: $('txt').value.trim() });
+    try {
+      let videoPath = null;
+      if (vfile) {
+        $('msg').textContent = 'Đang gửi video… (đừng tắt trang)'; bar(0.15);
+        const ext = ((vfile.type || 'video/mp4').split('/')[1] || 'mp4').replace('quicktime', 'mov').replace(/[^a-z0-9]/g, '') || 'mp4';
+        videoPath = await upload('art', `${base}_video.${ext}`, vfile, vfile.type || 'video/mp4'); bar(0.6);
+      }
+      $('msg').textContent = 'Đang gửi ảnh…';
+      const imagePath = await upload('art', `${base}.jpg`, IMG.main.blob, 'image/jpeg'); bar(0.75);
+      const title = $('title').value.trim().slice(0, 80);
+      const { error } = await sb.from('submissions').insert({
+        sid: ME.sid, class_id: ME.class_id, topic: t, title, story: th.txt.slice(0, 800),
+        image_path: imagePath, video_path: videoPath, meta: research(th), show_in_gallery: show
+      });
+      if (error) throw error; bar(0.85);
+      if (show) {
+        const g = `${ME.class_id}/${ME.sid}_CD${t}_${ts}`;
+        const big = await upload('gallery', g + '_big.jpg', IMG.mid.blob, 'image/jpeg');
+        const sm = await upload('gallery', g + '_sm.jpg', IMG.thumb.blob, 'image/jpeg');
+        const { error: ge } = await sb.from('gallery').upsert({
+          id: `${ME.class_id}_${t}_${ME.sid}`, class_id: ME.class_id, sid: ME.sid, topic: t, title, by_name: given(ME.name),
+          story: th.txt.slice(0, 300), kind: 'nha', image_path: big, thumb_path: sm, is_on: true, updated_at: new Date().toISOString()
+        });
+        if (ge) console.warn('gallery', ge);
+      }
+      bar(1);
+      $('msg').innerHTML = '<div class="ok">✔ Đã gửi bài! ' + (show ? 'Bài của em đã lên 🖼️ Triển lãm lớp cho các bạn cùng xem. ' : '') + 'Khi thầy cô chấm xong, phiếu đánh giá sẽ về 🔔 Hộp thư của em.</div>'; TL = null;
+    } catch (err) {
+      $('send').disabled = false; $('bar').hidden = true;
+      $('msg').innerHTML = '<div class="err">Chưa gửi được, em thử lại nhé. (' + esc(AI.errText(err)) + ')</div>';
+    }
+  };
+
+  /* ---------- triển lãm lớp ---------- */
+  let TL = null, tlT = 0, LIKED = new Set();
+  function openTl() { $('tlCls').textContent = ME ? ME.class_id : ''; if (TL) drawTl(); else loadTl(); }
+  async function signed(paths) {
+    const P = paths.filter(Boolean); if (!P.length) return {};
+    const { data, error } = await sb.storage.from('gallery').createSignedUrls(P, 3600);
+    if (error) throw error; const o = {}; (data || []).forEach(x => { if (x.signedUrl) o[x.path] = x.signedUrl; }); return o;
+  }
+  async function loadTl() {
+    $('tlBody').innerHTML = '<small>Đang mở phòng triển lãm…</small>';
+    try {
+      const { data, error } = await sb.from('gallery').select('id,sid,topic,title,by_name,story,kind,image_path,thumb_path,updated_at')
+        .eq('class_id', ME.class_id).eq('is_on', true).order('updated_at', { ascending: false }).limit(200);
+      if (error) throw error;
+      const urls = await signed(data.map(a => a.thumb_path));
+      const lk = await sb.from('gallery_likes').select('gallery_id');
+      LIKED = new Set((lk.data || []).map(x => x.gallery_id));
+      TL = data.map(a => ({ wid: a.id, by: a.by_name, t: a.topic, title: a.title, thuyet: a.story, kind: a.kind, big_path: a.image_path, thumb: urls[a.thumb_path] || '' }));
+      drawTl();
+    } catch (err) { $('tlBody').innerHTML = `<div class="err">Chưa mở được triển lãm: ${esc(AI.errText(err))}</div>`; }
+  }
+  $('tlRe').onclick = () => { TL = null; openTl(); };
+  function drawTl() {
+    const L = TL.filter(a => !tlT || a.t === tlT), ts = [...new Set(TL.map(a => a.t))].sort((a, b) => a - b);
+    $('tlBody').innerHTML = `<div class="chips"><button data-tt="0" class="${tlT ? '' : 'on'}">Tất cả (${TL.length})</button>${ts.map(t => `<button data-tt="${t}" class="${tlT === t ? 'on' : ''}">Chủ đề ${t}</button>`).join('')}</div>
+      ${L.length ? `<div class="gal">${L.map(a => `<button class="art" data-a="${esc(a.wid)}">${a.thumb ? `<img src="${esc(a.thumb)}" alt="${esc(a.title || 'Tác phẩm')}" loading="lazy">` : ''}<div><b>${esc(a.title || 'Tác phẩm của ' + a.by)}</b><small>${esc(a.by)} · CĐ ${a.t} · ${a.kind === 'nha' ? '🎨 em tự nộp' : '✏️ làm trên lớp'}</small><br><small>${LIKED.has(a.wid) ? '💛 em đã thích' : ''}</small></div></button>`).join('')}</div>`
+        : '<p><small>Phòng triển lãm của lớp ' + esc(ME.class_id) + ' chưa có tác phẩm nào. Khi các bạn nộp bài (và đồng ý trưng bày), tranh sẽ hiện ở đây.</small></p>'}`;
+    document.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => { tlT = +b.dataset.tt; drawTl(); });
+    document.querySelectorAll('[data-a]').forEach(b => b.onclick = () => viewArt(b.dataset.a));
+  }
+  async function viewArt(wid) {
+    const a = TL.find(x => x.wid === wid); if (!a) return;
+    const box = $('tlMB'), on = LIKED.has(wid);
+    box.innerHTML = `<div class="row"><h2 style="margin:0">${esc(a.title || 'Tác phẩm của ' + a.by)}</h2><button class="ghost" id="tlX">✕ Đóng</button></div>
+      <small>${esc(a.by)} · Lớp ${esc(ME.class_id)} · Chủ đề ${a.t}: ${esc(T[a.t - 1] || '')}</small>
+      <img id="tlBig" src="${esc(a.big || a.thumb)}" alt="${esc(a.title || 'Tác phẩm')}">
+      ${a.thuyet ? `<div class="fb">🗣️ <b>Bạn ấy kể:</b> ${esc(a.thuyet)}</div>` : ''}
+      <div class="fb">👀 <b>Em ngắm tranh của bạn:</b> Điều gì nổi bật nhất? Bạn dùng màu sắc, nét hay hình như thế nào? Em thích chi tiết nào?</div>
+      <div class="row" style="justify-content:flex-start;margin-top:10px"><button class="heart ${on ? 'on' : ''}" id="tlH">💛 ${on ? 'Em đã thích' : 'Thả tim'}</button></div>`;
+    $('tlM').hidden = false;
+    $('tlX').onclick = () => { $('tlM').hidden = true; };
+    $('tlH').onclick = async () => {
+      const now = !LIKED.has(wid);
+      if (now) LIKED.add(wid); else LIKED.delete(wid);
+      viewArt(wid); drawTl();
+      try {
+        const r = now ? await sb.from('gallery_likes').insert({ gallery_id: wid }) : await sb.from('gallery_likes').delete().eq('gallery_id', wid);
+        if (r.error && !/duplicate/i.test(r.error.message)) throw r.error;
+      } catch (e) { if (now) LIKED.delete(wid); else LIKED.add(wid); drawTl(); }
+    };
+    if (!a.big && a.big_path) try {
+      const u = await sb.storage.from('gallery').createSignedUrl(a.big_path, 3600);
+      if (u.data && u.data.signedUrl) { a.big = u.data.signedUrl; const im = $('tlBig'); if (im && !$('tlM').hidden) im.src = a.big; }
+    } catch (e) {}
+  }
+  $('tlM').onclick = e => { if (e.target === $('tlM')) $('tlM').hidden = true; };
+
+  sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_OUT' && ME) showLogin(); });
+  boot();
+})();
+</script>
+</body>
+</html>
