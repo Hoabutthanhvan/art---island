@@ -1051,13 +1051,13 @@ const BKTABS=[['🎭','Gặp hoạ sĩ'],['🖼️','Phòng tranh'],['🔎','Th�
 function bookMount(el,key){const S=SPR[key],B=kmBook(key),P=S.pal,K='kmb_'+key;let st;try{st=JSON.parse(localStorage.getItem(K)||'null')}catch(e){}
  st=Object.assign({pg:0,li:0,wi:0,stw:[{},{}],qa:{},qi:0,cmp:{},card:null,bk:0},st||{});const save=()=>{try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}};
  const solved=i=>(st.qa[i]||[]).some(j=>B.qs[i][1][j][1]),allQ=()=>B.qs.every((_,i)=>solved(i)),seen=()=>st.stw.some(x=>x&&x.see&&x.see.trim().length>=4);
- const lock=p=>p===2&&!seen()?'Viết một điều “Em thấy” ở Phòng tranh trước nhé.':p===5&&!st.card?'Nhận thẻ ở trang 📒 để mở khoá câu chuyện.':'';
+ const lock=p=>p>0&&window.ALB&&!ALB.tilesDone(B.k)?'Dán đủ 4 Mảnh Kiệt Tác vào 📒 Album sticker để bức tranh hiện ra và mở trang này.':p===2&&!seen()?'Viết một điều “Em thấy” ở Phòng tranh trước nhé.':p===5&&!st.card?'Nhận thẻ ở trang 📒 để mở khoá câu chuyện.':'';
  const head=(sz)=>kmHead(key,sz);
  const ta=(id,v,ph,rows)=>`<textarea id="${id}" rows="${rows||2}" maxlength="220" placeholder="${ph}">${esc(v||'')}</textarea>`;
  const frameArt=(w,cls)=>`<div class="bk-art ${cls||''}">${w.img?`<img src="${w.img}" alt="${esc(w.t)}" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;bk-ph&quot;><span>'+this.alt+'</span><small>Chưa tải được ảnh: bấm Xem tranh gốc</small></div>'">`:`<div class="bk-ph"><span>${esc(w.t)}</span><small>Ảnh tranh sẽ được gắn khi có tệp</small></div>`}</div>`;
  const pages=[
   // 1. Gặp hoạ sĩ
-  ()=>({sh:{fig:1,banner:[S.name,S.sub]},shR:{med:1},L:'',R:`<div class="bk-med m-${key}"><p class="bk-line in"><span>${S.lines[st.li]}</span></p><div class="bk-nav"><button class="bk-pill bk-say-btn" data-a="tts" data-t="line" aria-label="Đọc to lời hoạ sĩ">🔊</button><button class="bk-pill" data-a="lprev" ${st.li?'':'disabled'} aria-label="Lời trước">◂</button><span class="bk-dots">${S.lines.map((_,j)=>`<i class="${j===st.li?'on':''}"></i>`).join('')}</span><button class="bk-pill pri" data-a="lnext">${st.li<S.lines.length-1?'Chạm để nghe tiếp ▸':'Vào phòng tranh ▸'}</button></div></div>`}),
+  ()=>({sh:{fig:1,banner:[S.name,S.sub]},shR:{med:1},L:'',R:`<div class="bk-med m-${key}"><p class="bk-line in"><span>${S.lines[st.li]}</span></p><div class="bk-nav"><button class="bk-pill bk-say-btn" data-a="tts" data-t="line" aria-label="Đọc to lời hoạ sĩ">🔊</button><button class="bk-pill" data-a="lprev" ${st.li?'':'disabled'} aria-label="Lời trước">◂</button><span class="bk-dots">${S.lines.map((_,j)=>`<i class="${j===st.li?'on':''}"></i>`).join('')}</span><button class="bk-pill pri" data-a="lnext">${st.li<S.lines.length-1?'Chạm để nghe tiếp ▸':lock(1)&&window.ALB&&!ALB.tilesDone(B.k)?'📒 Ghép tranh trong album ▸':'Vào phòng tranh ▸'}</button></div></div>`}),
   // 2. Phòng tranh
   ()=>{const w0=B.works[st.wi],sx=w0.series?w0.series[st.ser|0]:null,w=sx?{...w0,img:sx.i}:w0,t=st.stw[st.wi]||{},ok=t.see&&t.see.trim().length>=4;return {sh:{banner:['PHÒNG TRANH',`Bức ${st.wi+1}/${B.works.length}`]},shR:{},
    L:`<div class="bk-galL">${frameArt(w)}${sx?`<div class="bk-ser">${w0.series.map((x,i)=>`<button type="button" class="bk-sb ${i===(st.ser|0)?'on':''}" data-a="ser" data-s="${i}" title="${esc(x.t)}" aria-label="${esc(x.t)}"><img src="${x.i}" alt=""></button>`).join('')}</div>`:''}<div class="bk-plate"><b>${esc(w.t)}</b><small>${sx?`${(st.ser|0)+1}/${w0.series.length} · ${esc(sx.t)}: ${esc(sx.n)}`:esc(w.d)}</small></div><div class="bk-row">${w.img?`<button class="bk-pill" data-a="full">🔍 Phóng to</button>`:''}<a class="bk-pill" href="${w.link||CS(w.q)}" target="_blank" rel="noopener">🔗 Xem tranh gốc</a></div><div class="bk-row">${B.works.map((x,i)=>`<button class="bk-pill ${i===st.wi?'on':''}" data-a="wk" data-i="${i}">Bức ${i+1}</button>`).join('')}</div></div>`,
@@ -1105,13 +1105,13 @@ function bookMount(el,key){const S=SPR[key],B=kmBook(key),P=S.pal,K='kmb_'+key;l
  el.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const a=b.dataset.a;
   if(a==='tts'){const t=b.dataset.t,txt=t==='line'?S.lines[st.li]:t==='note'?B.works[st.wi].note:t==='q'?B.qs[st.qi][0]+'. '+B.qs[st.qi][1].map(o=>o[0]).join('. '):B.story.join(' ');kmSpeak(txt,!!S.fem,b);return}
   if(a==='tab'||a==='go'){kmStop();return goP(+b.dataset.p)}if(a==='prev'){kmStop();return goP(st.pg-1)}if(a==='next'){kmStop();return goP(st.pg+1)}
-  if(a==='lnext'){kmStop();if(st.li<S.lines.length-1){st.li++;render();if(kmAuto)kmSpeak(S.lines[st.li],!!S.fem,el.querySelector('[data-t="line"]'))}else goP(1);return}if(a==='lprev'){kmStop();if(st.li>0){st.li--;render()}return}
+  if(a==='lnext'){kmStop();if(st.li<S.lines.length-1){st.li++;render();if(kmAuto)kmSpeak(S.lines[st.li],!!S.fem,el.querySelector('[data-t="line"]'))}else if(lock(1)&&window.ALB&&!ALB.tilesDone(B.k))openAlb();else goP(1);return}if(a==='lprev'){kmStop();if(st.li>0){st.li--;render()}return}
   if(a==='wk'){saveN();st.wi=+b.dataset.i;st.ser=0;render(1);return}
   if(a==='ser'){st.ser=+b.dataset.s;render(1);return}
   if(a==='saveN'){saveN();const t=st.stw[st.wi]||{};render();toastB(t.see&&t.see.length>=4?'💾 Đã lưu ghi chú!':'Em viết điều em thấy (ít nhất vài chữ) nhé.');return}
   if(a==='full'){const w0=B.works[st.wi],w=w0.series?{...w0,img:w0.series[st.ser|0].i,t:w0.series[st.ser|0].t}:w0;if(w.img)viewFull(w.img,w.t);return}
   if(a==='ans'){const j=+b.dataset.j,arr=st.qa[st.qi]=st.qa[st.qi]||[];if(!arr.includes(j))arr.push(j);if(allQ()&&window.ALB)ALB.grant(B.k,'tt');render();return}
-  if(a==='alb'){kmStop();if(window.ALB)ALB.open(B.k,()=>render());return}
+  if(a==='alb'){kmStop();openAlb();return}
   if(a==='qn'){st.qi++;render(1);return}
   if(a==='chip'){const t=el.querySelector(el._lastTa||'#bkSame');t.value=(t.value?t.value.replace(/\s*$/,'')+' ':'')+'Về '+b.dataset.c+': ';t.focus();return}
   if(a==='saveC'){st.cmp={same:el.querySelector('#bkSame').value.trim(),diff:el.querySelector('#bkDiff').value.trim()};save();toastB('💾 Đã lưu phần so sánh!');return}
@@ -1119,7 +1119,8 @@ function bookMount(el,key){const S=SPR[key],B=kmBook(key),P=S.pal,K='kmb_'+key;l
   if(a==='col'){col=b.dataset.c;el.querySelectorAll('.bk-sw').forEach(x=>x.classList.toggle('on',x===b));return}
   if(a==='clr'){labInit(1);const d=el.querySelector('#bkDist');d.value=0;d.oninput();return}
   if(a==='bk'){st.bk=1;render();kmSync(B.k,st);toastB('🎒 Đã mượn bí kíp “'+B.bk[0]+'”. Phù Tiên ở trạm Thực hành sẽ hỏi em dùng nó ở đâu!');return}});
- if(window.ALB){if(allQ())ALB.grantQuiet(B.k,'tt');if(st.card)ALB.grantQuiet(B.k,'bk')}
+ function openAlb(){if(window.ALB)ALB.open(B.k,()=>{if(ALB.takeReveal()===B.k){dir=1;st.pg=1;render(1)}else render()})}
+ if(window.ALB){ALB.sync(B.k);if(allQ())ALB.grantQuiet(B.k,'tt');if(st.card)ALB.grantQuiet(B.k,'bk');if(st.pg>0&&!ALB.tilesDone(B.k))st.pg=0}
  el.addEventListener('focusin',e=>{if(e.target.id==='bkSame'||e.target.id==='bkDiff')el._lastTa='#'+e.target.id});
  el.addEventListener('change',e=>{if(/^bk(See|Think|Wonder)$/.test(e.target.id)){saveN();save()}if(/^bk(Same|Diff)$/.test(e.target.id)){st.cmp={same:el.querySelector('#bkSame').value.trim(),diff:el.querySelector('#bkDiff').value.trim()};save()}});
  render()}
@@ -3231,7 +3232,7 @@ window.xGiveOrbs=giveOrbs;window.xBurst=burst;
 
 /* Mảnh kiệt tác rơi ra khi hoàn thành một giàn giáo (ST lưu ở ai_st) */
 const _set=LS.set.bind(LS);
-LS.set=function(k,v){if(k==='ai_st'){try{const old=_set===null?{}:(JSON.parse(localStorage.getItem('ai_st')||'{}')||{});for(const i in v){const a=v[i]||[],o=old[i]||[];a.forEach((x,j)=>{if(x&&!o[j]){const n=a.filter(Boolean).length;setTimeout(()=>{SFX.shard();floatAt(document.getElementById('xbag'),`+1 <span class="xshd"></span>`);toast(`🧩 Nhặt được Mảnh Kiệt Tác ${n}/4 của Chủ đề ${+i+1}!${n===4?' Phòng tranh khách mời đã mở!':''}`);drawHud()},450)}})}}catch(e){}}return _set(k,v)};
+LS.set=function(k,v){if(k==='ai_st'){try{const old=_set===null?{}:(JSON.parse(localStorage.getItem('ai_st')||'{}')||{});for(const i in v){const a=v[i]||[],o=old[i]||[];a.forEach((x,j)=>{if(x&&!o[j]){const n=a.filter(Boolean).length;if(j<4&&window.ALB)ALB.grantQuiet(+i,'g'+j);setTimeout(()=>{SFX.shard();floatAt(document.getElementById('xbag'),`+1 <span class="xshd"></span>`);toast(`🧩 Nhặt được Mảnh Kiệt Tác ${n}/4 của Chủ đề ${+i+1}! Mở 📒 Album sticker trong Sách khách mời để dán mảnh tranh.`);drawHud()},450)}})}}catch(e){}}return _set(k,v)};
 
 /* Hạt màu + âm thanh cho mỗi câu trả lời hình ảnh (phản hồi .qexp / .bk-fb) */
 const heard=new Set();
@@ -4293,12 +4294,16 @@ const G=k=>(typeof GUEST!=='undefined'&&GUEST[k])||{n:'Hoạ sĩ',y:'',c:''};
 const short=k=>G(k).n.split(' ').pop();
 const E=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let S=load();
-function load(){let x=null;try{x=JSON.parse(localStorage.getItem(LSK)||'null')}catch(e){}return Object.assign({have:{},packs:{},got:{}},x||{})}
+function load(){let x=null;try{x=JSON.parse(localStorage.getItem(LSK)||'null')}catch(e){}x=Object.assign({have:{},pend:{},got:{}},x||{});
+ if(x.packs){/* chuyển từ bản cũ (gói ngẫu nhiên) sang gói có sẵn sticker */for(const id in x.got){const [k,w]=id.split(':'),i=w==='tt'?4:w==='bk'?5:-1;if(i>=0&&!(x.have[k]&&x.have[k][i])){(x.pend[k]=x.pend[k]||[]).includes(i)||x.pend[k].push(i)}}delete x.packs}
+ return x}
 const save=()=>{try{localStorage.setItem(LSK,JSON.stringify(S))}catch(e){}};
 const has=(p,i)=>!!(S.have[p]&&S.have[p][i]);
 const cnt=p=>S.have[p]?Object.keys(S.have[p]).length:0;
 const no=(p,i)=>p*PER+i+1;
-const packsAll=()=>Object.values(S.packs).reduce((a,b)=>a+b,0);
+const pend=p=>(S.pend[p]||[]).filter(i=>!has(p,i));
+const packsAll=()=>AP.reduce((a,_,p)=>a+(pend(p).length?1:0),0);
+const tilesDone=p=>[0,1,2,3].every(i=>has(p,i));
 const myNote=p=>{try{const st=JSON.parse(localStorage.getItem('kmb_'+KEYS[p])||'null');return st&&st.card&&st.card.see||''}catch(e){return ''}};
 
 /* ---------- CSS ---------- */
@@ -4466,7 +4471,7 @@ function cardHTML(p){const g=G(p),n=myNote(p);return `<div class="ab-pc"><b>${E(
 function label(p,i){const d=AP[p];return i<4?`Mảnh ${i+1}/4 · ${d.m.t}`:i===4?d.s.t:'Thẻ hoạ sĩ'}
 function slotHTML(p,i,cls){const f=has(p,i),r=RAR(i);
  return `<div class="ab-slot ${cls} ${r?'r-'+r:''} ${f?'on':''}" data-i="${i}" role="img" aria-label="Ô số ${no(p,i)}${f?': '+E(label(p,i)):' còn trống'}">
-  ${i<5?`<div class="ab-ghost" style="${artStyle(p,i)}"></div><div class="ab-art" style="${artStyle(p,i)}"></div>`:`<div class="ab-art">${cardHTML(p)}</div>`}
+  ${i<5?`${i===4?`<div class="ab-ghost" style="${artStyle(p,i)}"></div>`:''}<div class="ab-art" style="${artStyle(p,i)}"></div>`:`<div class="ab-art">${cardHTML(p)}</div>`}
   <span class="ab-num">${no(p,i)}</span></div>`}
 
 function toast(m){const t=document.createElement('div');t.className='ab-toast';t.setAttribute('role','status');t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
@@ -4477,13 +4482,13 @@ function burst(el,cols,n){if(matchMedia('(prefers-reduced-motion: reduce)').matc
 
 /* ---------- cửa sổ album ---------- */
 let OV=null,PG=0,onClose=null;
-function open(k,cb){S=load();PG=k|0;onClose=cb||null;if(OV)OV.remove();
+function open(k,cb){AP.forEach((_,i)=>sync(i));S=load();PG=k|0;onClose=cb||null;if(OV)OV.remove();
  OV=document.createElement('div');OV.className='ab-ov';OV.setAttribute('role','dialog');OV.setAttribute('aria-label','Album sticker hoạ sĩ');
  OV.innerHTML=`<div class="ab-wrap"><div class="ab-top"><h2>📒 Album sticker hoạ sĩ</h2><button class="ab-btn" data-x>✕ Đóng album</button></div>
   <section class="ab-album"><div class="ab-bar"><button class="ab-ib" data-a="prev" aria-label="Trang trước">‹</button><button class="ab-ib" data-a="list" aria-label="Danh sách trang">☰</button><div class="ab-ttl"></div><span class="ab-ib" aria-hidden="true" style="visibility:hidden"></span><button class="ab-ib" data-a="next" aria-label="Trang sau">›</button></div>
    <div class="ab-page"></div><div class="ab-list" hidden></div>
    <div class="ab-foot"><button class="ab-btn pri" data-a="pack">🎁 Mở gói sticker<span class="ab-badge"></span></button><span class="ab-mini ab-tot"></span></div></section>
-  <div class="ab-help"><b>Làm sao có gói sticker?</b><ul><li>Trả lời đúng hết <b>Thử thách</b> quan sát trong Sách khách mời: 1 gói.</li><li>Nhận thẻ ở trang <b>Thẻ & bí kíp</b>: 1 gói.</li><li>Gói chỉ có sticker em chưa có. Dán đủ 6 ô, em mở khoá một charm hoạ sĩ trong 🎁 Xưởng thiết kế.</li></ul></div></div>`;
+  <div class="ab-help"><b>Làm sao có sticker?</b><ul><li>Mỗi giàn giáo em hoàn thành ở đảo cho 1 <b>Mảnh Kiệt Tác</b> 🧩. Dán đủ 4 mảnh, bức tranh của hoạ sĩ hiện ra và <b>Sách khách mời mở các trang còn lại</b>.</li><li>Trả lời đúng hết <b>Thử thách</b> quan sát: sticker ◆ Hiếm.</li><li>Nhận thẻ ở trang <b>Thẻ & bí kíp</b>: sticker ★ Kiệt tác. Dán đủ 6 ô, em mở khoá một charm hoạ sĩ trong 🎁 Xưởng thiết kế.</li></ul></div></div>`;
  document.body.appendChild(OV);document.body.style.overflow='hidden';
  OV.addEventListener('click',e=>{const b=e.target.closest('[data-a],[data-x],[data-p]');if(!b||b.disabled)return;
   if(b.hasAttribute('data-x'))return close();
@@ -4491,7 +4496,7 @@ function open(k,cb){S=load();PG=k|0;onClose=cb||null;if(OV)OV.remove();
   const a=b.dataset.a;
   if(a==='prev'&&PG>0){PG--;render(1)}else if(a==='next'&&PG<AP.length-1){PG++;render(1)}
   else if(a==='list')toggleList();
-  else if(a==='pack'){const p=S.packs[PG]?PG:+Object.keys(S.packs).find(k=>S.packs[k]>0);if(!isNaN(p))openPack(p)}});
+  else if(a==='pack'){const p=pend(PG).length?PG:AP.findIndex((_,k)=>pend(k).length);if(p>=0)openPack(p)}});
  OV.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('.ab-pov,.ab-rw'))close()});
  addEventListener('resize',sizeFrame);render();OV.querySelector('[data-x]').focus()}
 function close(){if(!OV)return;removeEventListener('resize',sizeFrame);OV.remove();OV=null;document.body.style.overflow=document.querySelector('.kmo')?'hidden':'';onClose&&onClose()}
@@ -4502,28 +4507,26 @@ function render(anim){if(!OV)return;const p=PG,d=AP[p],c=cnt(p),g=G(p);
  OV.querySelector('[data-a="prev"]').disabled=p===0;OV.querySelector('[data-a="next"]').disabled=p===AP.length-1;
  const pg=OV.querySelector('.ab-page');
  pg.innerHTML=`<div class="ab-ph"><h3>${E(g.n)}</h3><small>Chủ đề ${p+1} · ${E(d.k)}</small><span class="ab-prog">${c}/${PER}</span></div>
-  <div class="ab-main"><div class="ab-mf ${c===PER?'done':''}">${[0,1,2,3].map(i=>slotHTML(p,i,'')).join('')}</div><div class="ab-cap">${E(d.m.t)}</div></div>
+  <div class="ab-main"><div class="ab-mf ${tilesDone(p)?'done':''}">${[0,1,2,3].map(i=>slotHTML(p,i,'')).join('')}</div><div class="ab-cap">${E(d.m.t)}</div></div>
   <div class="ab-side"><div>${slotHTML(p,4,'ab-s4')}<div class="ab-cap">${E(d.s.t)}</div></div><div>${slotHTML(p,5,'ab-s5')}<div class="ab-cap">Thẻ hoạ sĩ</div></div></div>
   ${c===PER?'<div class="ab-stamp">Hoàn thành trang!</div>':''}`;
  sizeFrame();
  if(anim){pg.classList.remove('turn');void pg.offsetWidth;pg.classList.add('turn')}
  const tp=packsAll(),pb=OV.querySelector('[data-a="pack"]');
  pb.querySelector('.ab-badge').textContent=tp;pb.querySelector('.ab-badge').hidden=!tp;pb.disabled=!tp;pb.classList.toggle('has',tp>0);
- OV.querySelector('.ab-tot').textContent=tp?`${AP.reduce((a,_,i)=>a+cnt(i),0)}/${TOTAL} sticker`:`${AP.reduce((a,_,i)=>a+cnt(i),0)}/${TOTAL} sticker · Chưa có gói nào, em học tiếp trong Sách khách mời nhé.`}
+ OV.querySelector('.ab-tot').textContent=tp?`${AP.reduce((a,_,i)=>a+cnt(i),0)}/${TOTAL} sticker`:`${AP.reduce((a,_,i)=>a+cnt(i),0)}/${TOTAL} sticker · Chưa có gói nào. Em hoàn thành giàn giáo ở đảo để nhận Mảnh Kiệt Tác nhé.`}
 function sizeFrame(){if(!OV)return;const mf=OV.querySelector('.ab-mf');if(!mf)return;const d=AP[PG],w=mf.parentElement.clientWidth,maxH=Math.min(400,innerHeight*.55);
  const W=Math.min(w,maxH*d.m.r);mf.style.width=W+'px';mf.style.height=(W/d.m.r)+'px'}
 
 /* ---------- mở gói ---------- */
 function openPack(p){
- const d=AP[p],miss=[...Array(PER).keys()].filter(i=>!has(p,i));
- if(!miss.length){delete S.packs[p];save();render();return}
- for(let i=miss.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[miss[i],miss[j]]=[miss[j],miss[i]]}
- const got=miss.slice(0,PACK).sort((a,b)=>a-b);
+ const d=AP[p],got=pend(p).sort((a,b)=>a-b);
+ if(!got.length){delete S.pend[p];save();render();return}
  const ov=document.createElement('div');ov.className='ab-pov';ov.setAttribute('role','dialog');ov.setAttribute('aria-label','Mở gói sticker');
  ov.innerHTML=`<div class="ab-rays"></div><div class="ab-hint">Chạm vào gói để bóc!</div>
   <button class="ab-pack" style="--pk1:${d.pk[0]};--pk2:${d.pk[1]}" aria-label="Bóc gói sticker ${E(G(p).n)}">
    <div class="body"><div class="foil"></div><div class="logo"><small>Art Island</small>Sticker Hoạ sĩ</div>
-    <div class="medal" style="background-image:url('${d.m.img}')"></div>
+    <div class="medal" style="background:#fff;display:grid;place-items:center;overflow:hidden">${window.kmHead?kmHead(KEYS[p],'86%'):''}</div>
     <div class="five">${got.length} × <i></i></div><div class="who">${E(G(p).n)}</div></div>
    <div class="crimp b"></div><div class="lid"><div class="crimp t"></div><div class="strip"></div></div>
   </button><div class="ab-cards"></div><div class="ab-ovf"></div>`;
@@ -4551,7 +4554,7 @@ function done(p,got,ov){
  const b=of.querySelector('button');b.focus();b.onclick=()=>paste(p,got,ov)}
 function paste(p,got,ov){
  const rects=got.map(i=>ov.querySelector(`.ab-card[data-i="${i}"] .f`).getBoundingClientRect());
- S.packs[p]--;if(S.packs[p]<=0)delete S.packs[p];save();
+ const wasT=tilesDone(p);delete S.pend[p];save();
  PG=p;OV.querySelector('.ab-list').hidden=true;render();
  ov.classList.add('fade');setTimeout(()=>ov.remove(),350);
  const page=OV.querySelector('.ab-page');page.scrollIntoView({block:'center',behavior:'smooth'});
@@ -4566,10 +4569,14 @@ function paste(p,got,ov){
    slot.classList.add('on','pop','shine');slot.setAttribute('aria-label',`Ô số ${no(p,i)}: ${label(p,i)}`);snd('pop');
    burst(slot,RAR(i)==='gold'?['#f4b400','#fff']:['#e8467c','#ffd0e1','#fff'],10);
    const pr=page.querySelector('.ab-prog');if(pr)pr.textContent=`${cnt(p)}/${PER}`;
-   if(k===got.length-1)setTimeout(()=>{render();if(cnt(p)===PER)complete(p)},500)};
+   if(k===got.length-1)setTimeout(()=>{render();if(!wasT&&tilesDone(p))reveal(p);else if(cnt(p)===PER)complete(p)},500)};
   const an=f.animate([{transform:'translate(0,0) rotate(0) scale(1)'},{transform:`translate(${dx*.5}px,${dy*.5-80}px) rotate(${k%2?10:-10}deg) scale(1.1)`,offset:.5},{transform:`translate(${dx}px,${dy}px) scale(${sx},${sy})`}],{duration:700,delay:k*260,easing:'cubic-bezier(.5,0,.3,1)',fill:'forwards'});
   an.onfinish=fin;
  })},420)}
+function reveal(p){const d=AP[p];snd('done');const mf=OV&&OV.querySelector('.ab-mf');if(mf)burst(mf,['#f4b400','#e8467c','#3d8bfd','#2e9b5b','#fff'],60);
+ setTimeout(()=>{const r=document.createElement('div');r.className='ab-rw';
+  r.innerHTML=`<div class="box" role="dialog" aria-label="Kiệt tác đã hiện ra"><h3>Kiệt tác đã hiện ra!</h3><p style="margin:0 0 8px">Em đã ghép đủ 4 mảnh bức <b>“${E(d.m.t)}”</b> của ${E(G(p).n)}.</p><p class="ab-mini" style="margin:0 0 14px">Sách khách mời đã mở: Phòng tranh, Thử thách, So sánh, Thẻ & bí kíp. Em vào ngắm tranh kĩ hơn và nhận thêm sticker nhé!</p><button class="ab-btn pri">📖 Vào phòng tranh</button></div>`;
+  document.body.appendChild(r);const b=r.querySelector('button');b.focus();b.onclick=()=>{r.remove();afterReveal=p;close()}},900)}
 function complete(p){const d=AP[p],ck='hs_'+KEYS[p];snd('done');
  const mf=OV&&OV.querySelector('.ab-mf');if(mf)burst(mf,['#f4b400','#e8467c','#3d8bfd','#2e9b5b','#fff'],60);
  setTimeout(()=>{const r=document.createElement('div');r.className='ab-rw';
@@ -4577,11 +4584,15 @@ function complete(p){const d=AP[p],ck='hs_'+KEYS[p];snd('done');
   document.body.appendChild(r);const b=r.querySelector('button');b.focus();b.onclick=()=>r.remove()},900)}
 
 /* ---------- API cho Sách khách mời & Xưởng thiết kế ---------- */
-function grant(k,why){S=load();const id=k+':'+why;if(S.got[id])return false;S.got[id]=1;
- const need=PER-cnt(k)-PACK*(S.packs[k]||0);if(need>0)S.packs[k]=(S.packs[k]||0)+1;save();
- if(need>0)toast(`🎁 Em nhận được 1 gói sticker ${short(k)}! Mở ở nút 📒 Album sticker.`);return need>0}
-function grantQuiet(k,why){S=load();const id=k+':'+why;if(S.got[id])return;S.got[id]=1;if(PER-cnt(k)-PACK*(S.packs[k]||0)>0)S.packs[k]=(S.packs[k]||0)+1;save()}
-window.ALB={open,grant,grantQuiet,packs:k=>{S=load();return k==null?packsAll():(S.packs[k]||0)},charmOn:ck=>{S=load();const p=KEYS.indexOf(ck.replace('hs_',''));return p>=0&&cnt(p)===PER},CHARM,CHN};
+let afterReveal=null;
+const WHY=w=>w==='tt'?4:w==='bk'?5:/^g[0-3]$/.test(w)?+w[1]:-1;
+function add(k,why){const i=WHY(why),id=k+':'+why;if(i<0||S.got[id])return -1;S.got[id]=1;if(has(k,i)){save();return -1}const a=S.pend[k]=S.pend[k]||[];if(!a.includes(i))a.push(i);save();return i}
+/* bù mảnh cho giàn giáo đã xong (đọc ai_st) */
+function sync(k){S=load();let st={};try{st=JSON.parse(localStorage.getItem('ai_st')||'{}')||{}}catch(e){}(st[k]||[]).forEach((x,j)=>{if(x&&j<4)add(k,'g'+j)})}
+function grant(k,why){S=load();const i=add(k,why);if(i<0)return false;
+ toast(i===5?`🎁 Em nhận được sticker ★ Kiệt tác của ${short(k)}! Mở ở nút 📒 Album sticker.`:`🎁 Em nhận được sticker ◆ Hiếm của ${short(k)}! Mở ở nút 📒 Album sticker.`);return true}
+function grantQuiet(k,why){S=load();return add(k,why)>=0}
+window.ALB={open,grant,grantQuiet,sync,tilesDone:k=>{S=load();return tilesDone(k)},takeReveal:()=>{const r=afterReveal;afterReveal=null;return r},packs:k=>{S=load();return k==null?packsAll():(pend(k).length?1:0)},charmOn:ck=>{S=load();const p=KEYS.indexOf(ck.replace('hs_',''));return p>=0&&cnt(p)===PER},CHARM,CHN};
 })();
 
 </script>
