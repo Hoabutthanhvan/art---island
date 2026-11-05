@@ -233,6 +233,17 @@
       const { data, error } = await sb.storage.from('art').download(path);
       if (error) throw wrap(error); return data;
     },
+    /** Dữ liệu sử dụng học liệu của các lớp (đọc theo trang 1000 dòng) */
+    async usage(classIds) {
+      const out = [];
+      for (let from = 0; from < 200000; from += 1000) {
+        const { data, error } = await sb.from('usage_events').select('sid,visit,ev,island,step,view,at,verified')
+          .in('class_id', classIds).order('id').range(from, from + 999);
+        if (error) throw wrap(error);
+        out.push(...data); if (data.length < 1000) break;
+      }
+      return out;
+    },
     async markProcessed(id, result) {
       const { error } = await sb.from('submissions').update({ processed_at: new Date().toISOString(), }).eq('id', id);
       if (error) throw wrap(error);

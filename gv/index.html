@@ -504,7 +504,7 @@ function vSo(){
     <p class="note">⏳ đã thu, chờ đánh giá · ✨ AI đã gợi ý · HTT / HT / CHT: GV đã duyệt · ⚑ ảnh đã thay sau khi duyệt, nên xem lại. Bấm ô trống để tải ảnh riêng cho em đó.</p>`}
   else{const L=WORKS.filter(w=>w.cid===curC&&w.t===bookT&&(!bookQ||R.some(s=>s.sid===w.sid))).sort((a,b)=>({cho:0,ai:1,duyet:2}[a.status]-{cho:0,ai:1,duyet:2}[b.status])||(stu(a.sid)?.stt||0)-(stu(b.sid)?.stt||0));
     body=L.length?`<div class="cards">${L.map(w=>{const s=stu(w.sid)||{};return `<button class="wk" data-w="${esc(w.id)}"><img src="${th(w)}" alt="" loading="lazy"><b>${s.stt||''}. ${esc(s.name||w.sid)}</b><div class="row" style="justify-content:space-between">${stPill(w)}${w.vidId||w.vidUrl?'<span title="Có video">🎬</span>':''}${w.group&&w.group.length>1?'<span class="sub">Bài nhóm</span>':''}${w.flag?'<span title="Ảnh đã thay">⚑</span>':''}</div></button>`}).join('')}</div>`:`<div class="empty"><b>Chưa có bài nào cho chủ đề ${bookT}</b>Vào tab Thu bài để chụp sản phẩm của lớp.</div>`}
-  $('#view').innerHTML=`<section class="card f"><div class="sh"><h3>Sổ theo dõi · Lớp ${esc(curC)}</h3><div class="row"><input class="txt" id="q" placeholder="Tìm tên học sinh" value="${esc(bookQ)}" style="width:200px"><button class="btn vio" id="aiAll" ${pendT&&smp&&imgMax?'':'disabled'}>✨ AI gợi ý ${pendT} bài chờ</button><button class="btn" id="csv">⬇️ Xuất bảng (CSV)</button><button class="btn" id="rsx" title="Kế hoạch Giàn giáo 3, lời Kể về bài, Mắt hoạ sĩ của từng bài nộp, kèm phiếu chấm mù">📊 Xuất dữ liệu nghiên cứu (Excel)</button><button class="btn" id="tlAll" title="Đưa các bài đã duyệt (em đồng ý trưng bày) lên Triển lãm lớp của học sinh">🖼️ Trưng bày bài đã duyệt</button></div></div>${topicBar(bookT,null,true)}${bookT?`<p class="note" style="margin:0"><b>Chủ đề ${bookT}:</b> ${esc(TOPICS[bookT-1])}</p>`:''}${body}</section>`;
+  $('#view').innerHTML=`<section class="card f"><div class="sh"><h3>Sổ theo dõi · Lớp ${esc(curC)}</h3><div class="row"><input class="txt" id="q" placeholder="Tìm tên học sinh" value="${esc(bookQ)}" style="width:200px"><button class="btn vio" id="aiAll" ${pendT&&smp&&imgMax?'':'disabled'}>✨ AI gợi ý ${pendT} bài chờ</button><button class="btn" id="csv">⬇️ Xuất bảng (CSV)</button><button class="btn" id="rsx" title="Kế hoạch Giàn giáo 3, lời Kể về bài, Mắt hoạ sĩ của từng bài nộp, phiếu chấm mù và dữ liệu sử dụng học liệu">📊 Xuất dữ liệu nghiên cứu (Excel)</button><button class="btn" id="tlAll" title="Đưa các bài đã duyệt (em đồng ý trưng bày) lên Triển lãm lớp của học sinh">🖼️ Trưng bày bài đã duyệt</button></div></div>${topicBar(bookT,null,true)}${bookT?`<p class="note" style="margin:0"><b>Chủ đề ${bookT}:</b> ${esc(TOPICS[bookT-1])}</p>`:''}${body}</section>`;
   bindTopics(t=>{bookT=t;pref.set('bookT',t);render(true)});
   $('#q').oninput=e=>{bookQ=e.target.value;clearTimeout(vSo.k);vSo.k=setTimeout(()=>{render(true);setTimeout(()=>{const q=$('#q');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}},30)},250)};
   $$('[data-w]').forEach(b=>b.onclick=()=>review(b.dataset.w));
@@ -651,6 +651,31 @@ const XL=(()=>{const CT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++
 function blindCode(id){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let h=2166136261>>>0,o='';const mix=t=>{for(const c of String(t)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)>>>0}};mix(id);for(let i=0;i<5;i++){o+=A[h%32];mix(i+'|'+id)}return 'B-'+o}
 function splitThuyet(w){const r=w.research&&w.research.thuyet;if(r)return r;const t=String(w.thuyet||'');const yt=(t.match(/Yếu tố trọng tâm:\s*([^.]*)/)||[])[1]||'',nl=(t.match(/Nguyên lí:\s*([^.]*)/)||[])[1]||'';
  const txt=t.replace(/Yếu tố trọng tâm:\s*[^.]*\.?\s*/,'').replace(/Nguyên lí:\s*[^.]*\.?\s*/,'').trim();return {yt,nl,txt}}
+/* Dữ liệu sử dụng: tổng hợp theo HS và theo đảo, giàn giáo (Pha 4) */
+function usageSheets(U,who){
+ if(!U)return [{name:'Du lieu su dung',rows:[['Chưa đọc được dữ liệu sử dụng (máy chủ chưa có bảng hoặc mất mạng).']],widths:[80]}];
+ const GN=['GG1 Khám phá','GG2 Xem cách làm','GG3 Thực hành','GG4 Chia sẻ'],IS=[1,2,3,4,5,6,7,8];
+ const by={};U.forEach(e=>{(by[e.sid]=by[e.sid]||[]).push(e)});
+ const sids=Object.keys(by).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+ const head=['Mã HS','Họ và tên','Số lần vào web','Ngày đầu','Ngày gần nhất','Đã đăng nhập PIN',...IS.map(i=>'Đảo '+i+': số lần mở'),...IS.map(i=>'Đảo '+i+': giàn giáo xong (/4)'),...IS.map(i=>'Đảo '+i+': giàn giáo bỏ qua'),'Mở Xưởng vẽ','Mở Đảo Sáng Tạo','Mở Kho của em'];
+ const D=v=>v?new Date(v).toLocaleDateString('vi-VN'):'';
+ const rows=sids.map(sid=>{const E=by[sid],s=who(sid),ts=E.map(e=>+new Date(e.at)).sort((a,b)=>a-b);
+  const visits=new Set(E.filter(e=>e.ev==='visit').map(e=>e.visit)).size;
+  const per=IS.map(n=>{const i=n-1,ev=E.filter(e=>e.island===i),open=ev.filter(e=>e.ev==='island').length,
+    done=new Set(ev.filter(e=>e.ev==='done').map(e=>e.step)),seen=new Set(ev.filter(e=>e.ev==='step').map(e=>e.step));
+    const last=Math.max(-1,...done,...seen);const skip=[0,1,2,3].filter(j=>j<last&&!seen.has(j)&&!done.has(j)).map(j=>'GG'+(j+1)).join(', ');
+    return {open,done:done.size,skip}});
+  const vw=v=>E.filter(e=>e.ev==='view'&&e.view===v).length;
+  return [sid,s.name||'',visits,D(ts[0]),D(ts[ts.length-1]),E.some(e=>e.verified)?'Có':'Không',...per.map(p=>p.open),...per.map(p=>p.done),...per.map(p=>p.skip),vw('studio'),vw('creative'),vw('box')]});
+ const n=sids.length;
+ const head2=['Đảo','Giàn giáo','Số HS mở','Số HS hoàn thành','Số HS bỏ qua (mở giàn giáo sau mà chưa mở giàn giáo này)','Tỉ lệ hoàn thành / số HS vào đảo'];
+ const rows2=[];IS.forEach(nn=>{const i=nn-1,inIsl=sids.filter(s=>by[s].some(e=>e.island===i));
+  GN.forEach((g,j)=>{let o=0,d=0,k=0;inIsl.forEach(s=>{const ev=by[s].filter(e=>e.island===i),seen=ev.some(e=>e.ev==='step'&&e.step===j),dn=ev.some(e=>e.ev==='done'&&e.step===j),
+    later=ev.some(e=>(e.ev==='step'||e.ev==='done')&&e.step>j);if(seen)o++;if(dn)d++;if(!seen&&!dn&&later)k++});
+   rows2.push(['Đảo '+nn,g,o,d,k,inIsl.length?Math.round(d/inIsl.length*100)+'%':''])})});
+ const note=[[''],['Ghi chú: dữ liệu ghi từ trang học sinh khi em đã nhập mã số. "Bỏ qua" là giàn giáo em chưa mở mà đã mở giàn giáo sau. Trò Ếch qua sông không được ghi. Tổng số HS có dữ liệu: '+n+'.']];
+ return [{name:'Du lieu su dung',rows:[head,...rows],widths:head.map((h,i)=>i<2?(i?22:10):Math.max(9,Math.min(16,h.length/2+4))),freeze:[2,1],filter:1,bold:[0]},
+  {name:'Tong hop gian giao',rows:[head2,...rows2,...note],widths:[9,18,10,14,30,18],freeze:[2,1],bold:[0]}]}
 async function exportResearch(){
  if(!dl)return toast('Chế độ xem này không tải file được.');
  const cls=new Set(CLASSES.map(c=>c.cid)),W=WORKS.filter(w=>cls.has(w.cid)&&w.t>=1&&w.t<=8);if(!W.length)return toast('Chưa có bài nộp nào để xuất.');
@@ -673,7 +698,9 @@ async function exportResearch(){
   ['Cột "Có chép mẫu?": ghi C nếu bài lấy lại gần nguyên bố cục hoặc nhân vật của tranh mẫu trong SGK hay trên web, K nếu không.'],
   ['Cột "Hình ảnh chính": ghi 1–3 hình ảnh chính, cách nhau bằng dấu phẩy. Hình ảnh xuất hiện ở hơn 10% số bài tính là phổ biến; bài có nhiều hình ảnh hiếm có điểm độ hiếm cao hơn.'],
   ['Cột Mắt hoạ sĩ, Thám tử, Dây phơi có từ Apps Script bản 8; cột Câu chốt Xưởng thử có từ bản 9. Bài nộp trước đó để trống.']];
- const blob=XL([{name:'Du lieu tu duy',rows:[head,...rows],widths:w1,freeze:[4,1],filter:1,bold:[0]},{name:'Phieu cham mu',rows:[bHead,...bRows],widths:w2,freeze:[1,1],bold:[0]},{name:'Huong dan',rows:guide,widths:[34,30,30,30,36],bold:[0,7,8]}]);
+ let U=null;try{if(window.AIGV&&AIGV.usage)U=await AIGV.usage([...cls])}catch(e){U=null}
+ const useSh=usageSheets(U,R0=>stu(R0)||{});
+ const blob=XL([{name:'Du lieu tu duy',rows:[head,...rows],widths:w1,freeze:[4,1],filter:1,bold:[0]},{name:'Phieu cham mu',rows:[bHead,...bRows],widths:w2,freeze:[1,1],bold:[0]},{name:'Huong dan',rows:guide,widths:[34,30,30,30,36],bold:[0,7,8]},...useSh]);
  try{await dl.save({filename:`DuLieuNghienCuu_ArtIsland_${new Date().toLocaleDateString('sv-SE')}.xlsx`,data:blob});toast(`Đã tải bảng: ${rows.length} bài nộp.`)}catch(e){if(e.code!=='declined')toast('Chưa tải được ('+e.code+').')}}
 /* ===================== Tab: Tiêu chí ===================== */
 let tcT=1;
