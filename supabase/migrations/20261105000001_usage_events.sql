@@ -21,9 +21,11 @@ create index on public.usage_events (sid, created_at);
 
 alter table public.usage_events enable row level security;
 create policy "gv xem dữ liệu sử dụng lớp mình" on public.usage_events for select to authenticated
-  using (public.teaches(class_id));
+  using (private.teaches(class_id));
 create policy "gv xoá dữ liệu sử dụng lớp mình" on public.usage_events for delete to authenticated
-  using (public.teaches(class_id));
+  using (private.teaches(class_id));
+grant select, delete on public.usage_events to authenticated;
+revoke all on public.usage_events from anon;
 
 -- Trang học sinh gửi một gói mốc qua hàm này (không ghi thẳng vào bảng).
 create or replace function public.log_usage(p_sid text, p_visit text, p_events jsonb)
