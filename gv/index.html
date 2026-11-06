@@ -120,6 +120,23 @@ textarea,.f input,.f select,input.txt{width:100%;border:2px solid var(--line);bo
 @media(max-width:760px){.crow{grid-template-columns:1fr}}
 .crow textarea{min-height:64px;font-size:13px;overflow:hidden;resize:none;line-height:1.45}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Dạy trên lớp */
+.stage [hidden],.stage[hidden]{display:none!important}
+.stage{padding:0;overflow:hidden;position:relative}
+.stage iframe{display:block;width:100%;height:max(560px,calc(100vh - 230px));border:0;background:var(--sky2)}
+.stage:fullscreen iframe,.stage:fullscreen .vbox{height:100vh}
+.vbox{display:grid;grid-template-columns:minmax(0,1fr) 300px;min-height:max(480px,calc(100vh - 230px))}
+.vplay{background:#0d2233;display:grid;place-items:center;min-width:0}
+.vplay iframe,.vplay video{width:100%;height:100%;min-height:420px;border:0;background:#000}
+.vplay .vemp{color:#cfe3ef;text-align:center;padding:24px;max-width:46ch}
+.vlist{padding:14px;display:flex;flex-direction:column;gap:8px;border-left:2px solid var(--line);overflow:auto}
+.vit{display:flex;gap:6px;align-items:center;border:2px solid var(--line);border-radius:12px;padding:6px 8px;background:var(--card);text-align:left;font:inherit}
+.vit.on{border-color:var(--coral);background:#fff4ef}
+.vit b{flex:1;min-width:0;font-size:14px;overflow-wrap:anywhere}
+.daybar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.daybar .btn.on{background:var(--coral);border-color:var(--coral);color:#fff}
+@media(max-width:860px){.vbox{grid-template-columns:1fr}.vlist{border-left:0;border-top:2px solid var(--line)}}
 </style>
 
 <div class="wrap">
@@ -128,6 +145,7 @@ textarea,.f input,.f select,input.txt{width:100%;border:2px solid var(--line);bo
   <div id="app" hidden style="display:flex;flex-direction:column;gap:12px">
     <nav class="tabs" id="tabs" aria-label="Chức năng"></nav>
     <main id="view"></main>
+    <section id="dayStage" class="card stage" hidden aria-label="Màn chiếu"></section>
   </div>
 </div>
 <div class="modal" id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
@@ -171,8 +189,8 @@ const needLib=k=>libP[k]||(libP[k]=new Promise(r=>{const e=document.createElemen
 const pause=()=>new Promise(r=>setTimeout(r,0));
 /* ===================== Trạng thái ===================== */
 let db=null,user=null,assets=null,dl=null,smp=null,mcp=null,imgMax=0;
-let CLASSES=[],STUDENTS=[],WORKS=[],INBOX=[],CRIT={},HK={};
-let curC=pref.get('cls',''),curT=pref.get('topic',1),tab=(t=>['thu','so','lop','tc'].includes(t)?t:'thu')(pref.get('tab','thu')),bookT=pref.get('bookT',0),bookQ='';
+let CLASSES=[],STUDENTS=[],WORKS=[],INBOX=[],CRIT={},HK={},VIDEOS=[];
+let curC=pref.get('cls',''),curT=pref.get('topic',1),tab=(t=>['day','thu','so','lop','tc'].includes(t)?t:'thu')(pref.get('tab','thu')),bookT=pref.get('bookT',0),bookQ='';
 const QUEUE=[];/* nhật kí thu bài phiên này */
 const modal=$('#modal'),sheet=$('#sheet');
 const openM=(h,sm)=>{sheet.className='sheet'+(sm?' sm':'');sheet.innerHTML=h;modal.hidden=false};
@@ -201,12 +219,12 @@ function gate(icon,title,msg){$('#gate').innerHTML=`<div class="ic">${icon}</div
   $('#gate').hidden=true;$('#app').hidden=false;
   const sig={};const sub=(col,fn)=>db.collection(col).onSnapshot(s=>{const v=s.docs.map(d=>d.data()),k=JSON.stringify(v);if(sig[col]===k)return;sig[col]=k;fn(v);render()},e=>toast('Mất kết nối dữ liệu ('+e.code+'). Tải lại trang để thử lại.'));
   sub('classes',v=>{CLASSES=v.sort((a,b)=>a.cid.localeCompare(b.cid));if(!CLASSES.some(c=>c.cid===curC))curC=CLASSES[0]?CLASSES[0].cid:''});
-  sub('students',v=>STUDENTS=v);sub('works',v=>WORKS=v);sub('inbox',v=>INBOX=v);
+  sub('students',v=>STUDENTS=v);sub('videos',v=>VIDEOS=v);sub('works',v=>WORKS=v);sub('inbox',v=>INBOX=v);
   sub('criteria',v=>{CRIT={};v.forEach(c=>CRIT[c.id]=c)});sub('hk',v=>{HK={};v.forEach(h=>HK[h.sid]=h)});
   render();
 })();
 
-const TABS=[['thu','📷 Thu bài'],['so','📒 Sổ theo dõi'],['lop','👥 Lớp & thẻ mã'],['tc','🎯 Tiêu chí']];
+const TABS=[['day','🎬 Dạy trên lớp'],['thu','📷 Thu bài'],['so','📒 Sổ theo dõi'],['lop','👥 Lớp & thẻ mã'],['tc','🎯 Tiêu chí']];
 let rT=0,lastTab='',held=false;
 function render(force){cancelAnimationFrame(rT);rT=requestAnimationFrame(()=>{
   if(!force&&!modal.hidden){held=true;return}
@@ -218,13 +236,62 @@ function renderNow(){
   cs.innerHTML=CLASSES.map(c=>`<option value="${esc(c.cid)}" ${c.cid===curC?'selected':''}>Lớp ${esc(c.cid)}</option>`).join('');
   $('#tabs').innerHTML=TABS.map(t=>`<button data-t="${t[0]}" class="${tab===t[0]?'on':''}">${t[1]}</button>`).join('');
   $$('#tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;pref.set('tab',tab);render(true)});
-  const V={thu:vThu,so:vSo,lop:vLop,tc:vTc}[tab]||vThu;
-  if(!CLASSES.length&&tab!=='tc'){$('#view').innerHTML=`<div class="card empty"><b>Bắt đầu bằng việc tạo lớp</b>Nhập danh sách học sinh một lần, in thẻ mã, rồi thu bài cuối mỗi chủ đề.<div class="row" style="justify-content:center;margin-top:12px"><button class="btn pri" id="goLop">👥 Tạo lớp đầu tiên</button></div></div>`;$('#goLop').onclick=()=>{tab='lop';render()};if(tab==='lop')vLop();return}
+  const V={day:vDay,thu:vThu,so:vSo,lop:vLop,tc:vTc}[tab]||vThu;$('#dayStage').hidden=tab!=='day';
+  if(!CLASSES.length&&tab!=='tc'&&tab!=='day'){$('#view').innerHTML=`<div class="card empty"><b>Bắt đầu bằng việc tạo lớp</b>Nhập danh sách học sinh một lần, in thẻ mã, rồi thu bài cuối mỗi chủ đề.<div class="row" style="justify-content:center;margin-top:12px"><button class="btn pri" id="goLop">👥 Tạo lớp đầu tiên</button></div></div>`;$('#goLop').onclick=()=>{tab='lop';render()};if(tab==='lop')vLop();return}
   V();
 }
 $('#clsSel').onchange=e=>{curC=e.target.value;pref.set('cls',curC);render(true)};
 function topicBar(cur,onPick,withAll){return `<div class="topics">${withAll?`<button data-tp="0" class="${cur===0?'on':''}">Tất cả</button>`:''}${TOPICS.map((n,i)=>`<button data-tp="${i+1}" class="${cur===i+1?'on':''}" title="${esc(n)}">CĐ ${i+1}</button>`).join('')}</div>`}
 function bindTopics(fn){$$('[data-tp]').forEach(b=>b.onclick=()=>fn(+b.dataset.tp))}
+
+
+/* ===================== Tab: Dạy trên lớp =====================
+   Chiếu video khởi động và bốn giàn giáo của đảo cho cả lớp. Phần giàn giáo dùng lại chính trang học sinh
+   ở chế độ giáo viên (/?gv=1): không đăng nhập HS, không nộp bài, không Phòng triển lãm, dữ liệu lưu riêng. */
+let dayT=pref.get('dayT',1),dayM=pref.get('dayM','vid'),dayV='',dayLocal=null,dayFrame=null;
+function vidEmbed(u){u=String(u||'').trim();let m;
+  if(m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/))return {k:'if',src:'https://www.youtube-nocookie.com/embed/'+m[1]+'?rel=0'};
+  if(m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]{20,})/))return {k:'if',src:'https://drive.google.com/file/d/'+m[1]+'/preview'};
+  if(/^https:\/\/.+\.(mp4|webm|ogg)(\?.*)?$/i.test(u))return {k:'vd',src:u};
+  return null}
+function vDay(){
+  const vids=VIDEOS.filter(v=>v.tp===dayT).sort((a,b)=>(a.at||0)-(b.at||0));
+  if(!vids.some(v=>v.id===dayV))dayV=vids[0]?vids[0].id:'';
+  $('#view').innerHTML=`<section class="card f"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Dạy trên lớp · Chủ đề ${dayT}</h3><span class="note">${esc(TOPICS[dayT-1])}</span></div>
+   ${topicBar(dayT)}
+   <div class="daybar"><button class="btn ${dayM==='vid'?'on':''}" data-m="vid">🎬 Video khởi động</button><button class="btn ${dayM==='isl'?'on':''}" data-m="isl">🏝️ Bốn giàn giáo</button><button class="btn ${dayM==='eq'?'on':''}" data-m="eq">🐸 Ếch qua sông</button><span class="sp" style="flex:1"></span><button class="btn" id="dayFs">⛶ Toàn màn hình</button></div>
+   <p class="note" style="margin:0">Bốn giàn giáo mở đúng trang học sinh nhìn thấy, đủ Khám phá, Xem cách làm, Thực hành, Chia sẻ và Sách khách mời. Thao tác trên màn chiếu không ghi vào tiến trình hay dữ liệu của học sinh.</p></section>`;
+  bindTopics(t=>{dayT=t;pref.set('dayT',t);dayV='';dayLocal=null;render(true);if(dayM!=='vid')dayGo()});
+  $$('[data-m]').forEach(b=>b.onclick=()=>{dayM=b.dataset.m;pref.set('dayM',dayM);render(true);dayGo()});
+  $('#dayFs').onclick=()=>{const st=$('#dayStage');(st.requestFullscreen?st.requestFullscreen():Promise.reject()).catch(()=>toast('Trình duyệt không cho mở toàn màn hình. Thầy cô bấm F11 nhé.'))};
+  dayStage(vids)}
+function dayStage(vids){
+  const st=$('#dayStage');
+  if(dayM==='vid'){if(dayFrame)dayFrame.hidden=true;let vb=st.querySelector('.vbox');if(!vb){vb=document.createElement('div');vb.className='vbox';st.appendChild(vb)}vb.hidden=false;
+    const cur=vids.find(v=>v.id===dayV),e=cur&&vidEmbed(cur.url);
+    const sig=[dayT,dayV,dayLocal&&dayLocal.url,vids.map(v=>v.id+v.title+v.url).join('|')].join('#');if(vb.dataset.sig===sig)return;vb.dataset.sig=sig;
+    vb.innerHTML=`<div class="vplay">${dayLocal?`<video src="${dayLocal.url}" controls></video>`:e?(e.k==='if'?`<iframe src="${esc(e.src)}" title="${esc(cur.title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`:`<video src="${esc(e.src)}" controls></video>`):`<div class="vemp"><b style="font-size:18px">Chưa có video cho chủ đề ${dayT}</b><p>Thêm link YouTube, Google Drive (đã chia sẻ “Bất kì ai có đường liên kết”) hoặc chọn một tệp video trên máy ở cột bên phải.</p></div>`}</div>
+     <div class="vlist"><b>Video của chủ đề ${dayT}</b>
+      ${vids.map(v=>`<div class="vit ${v.id===dayV&&!dayLocal?'on':''}"><button class="lnk" data-pv="${esc(v.id)}" style="all:unset;cursor:pointer;flex:1;min-width:0"><b>▶ ${esc(v.title)}</b></button><button class="btn" data-dv="${esc(v.id)}" title="Xoá video này" aria-label="Xoá">✕</button></div>`).join('')||'<span class="note">Chưa có video nào.</span>'}
+      ${dayLocal?`<div class="vit on"><b>📁 ${esc(dayLocal.name)}</b></div>`:''}
+      <form id="fVid" class="f" style="margin-top:6px"><input class="txt" id="vTitle" maxlength="80" placeholder="Tên video, VD: Cảnh làng quê Việt Nam"><input class="txt" id="vUrl" placeholder="Dán link YouTube / Google Drive / .mp4"><button class="btn pri" type="submit">+ Lưu vào chủ đề ${dayT}</button></form>
+      <label class="btn" style="text-align:center;cursor:pointer">📁 Chiếu tệp trên máy<input type="file" id="vFile" accept="video/*" hidden></label>
+      <p class="note" style="margin:0">Tệp trên máy chỉ phát trên máy này, không tải lên. Video đã lưu đi theo tài khoản của thầy cô, mở ở máy nào cũng thấy.</p></div>`;
+    $$('[data-pv]').forEach(b=>b.onclick=()=>{dayV=b.dataset.pv;dayLocal=null;dayStage(vids)});
+    $$('[data-dv]').forEach(b=>b.onclick=async()=>{const v=vids.find(x=>x.id===b.dataset.dv);if(!v)return;if(b.dataset.ok!=='1'){b.dataset.ok='1';b.textContent='Xoá?';setTimeout(()=>{b.dataset.ok='';b.textContent='✕'},3000);return}
+      try{await db.doc('videos/'+v.id).delete();toast('Đã xoá video')}catch(e){toast('Chưa xoá được: '+(e.message||e.code))}});
+    $('#fVid').onsubmit=async ev=>{ev.preventDefault();const t=$('#vTitle').value.trim(),u=$('#vUrl').value.trim();
+      if(!vidEmbed(u)){toast('Link chưa đúng. Hãy dán link YouTube, Google Drive hoặc tệp .mp4.');return}
+      const id='t'+dayT+'-'+Date.now().toString(36);
+      try{await db.doc('videos/'+id).set({id,tp:dayT,title:(t||'Video chủ đề '+dayT).slice(0,80),url:u.slice(0,500),at:Date.now()});dayV=id;dayLocal=null;toast('Đã lưu video')}catch(e){toast('Chưa lưu được: '+(e.message||e.code))}};
+    $('#vFile').onchange=e=>{const f=e.target.files[0];if(!f)return;if(dayLocal)URL.revokeObjectURL(dayLocal.url);dayLocal={name:f.name,url:URL.createObjectURL(f)};dayStage(vids)};
+    return}
+  const vb=st.querySelector('.vbox');if(vb)vb.hidden=true;
+  if(!dayFrame){dayFrame=document.createElement('iframe');dayFrame.title='Art Island – màn chiếu của giáo viên';dayFrame.src='/?gv=1';dayFrame.addEventListener('load',()=>dayGo());st.appendChild(dayFrame)}
+  dayFrame.hidden=false}
+function dayGo(){const w=dayFrame&&dayFrame.contentWindow;if(!w||dayM==='vid')return;
+  try{if(dayM==='isl'&&w.openIsland){if(w.eqClose)w.eqClose();const o=w.document.getElementById('eqOv');if(o){o.hidden=true;o.classList.remove('show')}w.openIsland(dayT-1);w.scrollTo(0,0)}
+      else if(dayM==='eq'&&w.eqOpen)w.eqOpen(dayT-1)}catch(e){console.warn(e)}}
 
 /* ===================== Tab: Lớp & thẻ mã ===================== */
 function vLop(){

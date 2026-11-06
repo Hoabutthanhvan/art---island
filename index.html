@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="utf-8"><title>Art Island – Mĩ thuật 5</title><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700&display=swap" rel="stylesheet">
+<html lang="vi"><head><meta charset="utf-8"><script>/* Chế độ giáo viên (?gv=1): Bảng GV nhúng trang này để chiếu trên lớp. Dữ liệu lưu riêng (tiền tố gv:), không đụng tiến trình của HS dùng chung máy, không ghi dữ liệu sử dụng; ẩn các phần GV không dùng (đăng nhập HS, Phòng triển lãm, nộp bài). */
+(function(){if(!/[?&]gv=1(&|$)/.test(location.search))return;window.TEACH=true;const P='gv:',S=Storage.prototype,g=S.getItem,st=S.setItem,rm=S.removeItem,L=()=>{try{return localStorage}catch(e){return null}};
+S.getItem=function(k){return g.call(this,this===L()?P+k:k)};S.setItem=function(k,v){return st.call(this,this===L()?P+k:k,v)};S.removeItem=function(k){return rm.call(this,this===L()?P+k:k)};
+document.documentElement.classList.add('teach')})();</script>
+<style>html.teach nav [data-v=gallery],html.teach #whoBtn,html.teach .nopc,html.teach .eqgo.lk::after{display:none!important}</style><title>Art Island – Mĩ thuật 5</title><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#e8f6fb;--sea:#7ed0e6;--card:#fff;--ink:#23323d;--mut:#5f7380;--pri:#ff7a59;--acc:#2aa7a0;--line:#cfe3ea}
@@ -1051,7 +1055,7 @@ const BKTABS=[['🎭','Gặp hoạ sĩ'],['🖼️','Phòng tranh'],['🔎','Th�
 function bookMount(el,key){const S=SPR[key],B=kmBook(key),P=S.pal,K='kmb_'+key;let st;try{st=JSON.parse(localStorage.getItem(K)||'null')}catch(e){}
  st=Object.assign({pg:0,li:0,wi:0,stw:[{},{}],qa:{},qi:0,cmp:{},card:null,bk:0},st||{});const save=()=>{try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}};
  const solved=i=>(st.qa[i]||[]).some(j=>B.qs[i][1][j][1]),allQ=()=>B.qs.every((_,i)=>solved(i)),seen=()=>st.stw.some(x=>x&&x.see&&x.see.trim().length>=4);
- const lock=p=>p>0&&window.ALB&&!ALB.tilesDone(B.k)?'Dán đủ 4 Mảnh Kiệt Tác vào 📒 Album sticker để bức tranh hiện ra và mở trang này.':p===2&&!seen()?'Viết một điều “Em thấy” ở Phòng tranh trước nhé.':p===5&&!st.card?'Nhận thẻ ở trang 📒 để mở khoá câu chuyện.':'';
+ const lock=p=>p>0&&!window.TEACH&&window.ALB&&!ALB.tilesDone(B.k)?'Dán đủ 4 Mảnh Kiệt Tác vào 📒 Album sticker để bức tranh hiện ra và mở trang này.':p===2&&!seen()?'Viết một điều “Em thấy” ở Phòng tranh trước nhé.':p===5&&!st.card?'Nhận thẻ ở trang 📒 để mở khoá câu chuyện.':'';
  const head=(sz)=>kmHead(key,sz);
  const ta=(id,v,ph,rows)=>`<textarea id="${id}" rows="${rows||2}" maxlength="220" placeholder="${ph}">${esc(v||'')}</textarea>`;
  const frameArt=(w,cls)=>`<div class="bk-art ${cls||''}">${w.img?`<img src="${w.img}" alt="${esc(w.t)}" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;bk-ph&quot;><span>'+this.alt+'</span><small>Chưa tải được ảnh: bấm Xem tranh gốc</small></div>'">`:`<div class="bk-ph"><span>${esc(w.t)}</span><small>Ảnh tranh sẽ được gắn khi có tệp</small></div>`}</div>`;
@@ -1358,7 +1362,7 @@ function st4(){DC=DCk(cur);{const g=$('#ggBody');if(g)g.innerHTML=''}const DD=dS
    ${PQ.map((q,i)=>`<label style="display:block;margin:10px 0 4px;font-weight:800">${q[0]}</label><textarea data-sq="${i}" rows="2" maxlength="300" placeholder="${esc(q[1])}" style="width:100%;font:inherit;border:2px solid #f0e2cc;border-radius:12px;padding:8px">${esc(sh.q[i]||'')}</textarea>`).join('')}
   </div></aside></div></section>
   <div style="margin-top:14px"><div class="sh"><h3>② Trang trí đồ vật em yêu thích</h3><small class="mut">Vận dụng: đưa bài vẽ, chữ và hoạ tiết của em lên một đồ vật.</small></div>${decoCardHTML(DA,art,DD,[...new Set(DOBJ.map(o=>o[1]))])}</div>
-  <div class="card" style="padding:16px;margin-top:12px"><h3 style="margin-top:0">③ Nộp bài cho thầy cô <small class="mut">(không bắt buộc)</small></h3>
+  <div class="card nopc" style="padding:16px;margin-top:12px"><h3 style="margin-top:0">③ Nộp bài cho thầy cô <small class="mut">(không bắt buộc)</small></h3>
    ${art&&!canSub(art)?`<p class="mut">🖥️ Bài em đang chọn được làm trên máy nên chỉ lưu trong Kho của em, không nộp lên thầy cô. Muốn nộp, em làm bài bằng giấy, màu hoặc vật liệu thật rồi bấm nút 📷 chụp ảnh ở phía trên.</p>`:art?`<div class="row"><img src="${art.img}" alt="" style="width:120px;border-radius:10px;border:3px solid #fff"><div><b>${esc(art.title||'Bài của em')}</b><br><small class="mut">Bài nộp gồm: ảnh sản phẩm, chỗ em làm nổi bật, phần tự kiểm tra và lời em kể.</small></div></div><button class="cta" id="s4sub" style="margin-top:10px">📤 ${art.sub?'Nộp lại bài':'Nộp bài cho thầy cô'}</button>${art.sub?`<p class="copy">✔ Em đã mở trang nộp bài lúc ${esc(art.sub)}.</p>`:''}`:'<p class="mut">Có sản phẩm rồi em mới nộp được nhé.</p>'}
    <h3 style="margin:16px 0 6px">✅ Hoàn thành chủ đề</h3><button class="btn" id="fin">✅ Hoàn thành đảo</button></div>`;
  dRender();decoBind(st4);
@@ -1869,7 +1873,7 @@ drawGrid();
 const TEACHER_URL='https://claude.ai/artifact/FhfPpwUqmX3W9TUXz5oZZA';
 const who=()=>({n:LS.get('ai_name',''),c:LS.get('ai_cls',''),sid:LS.get('ai_sid','')});
 function rWho(){const w=who();$('#whoBtn').textContent=w.n?('👋 '+w.n+(w.sid?' · '+w.sid:(w.c?' · '+w.c:''))):'👋 Đăng nhập'}
-function welcome(force){const w=who();if(w.n&&w.c&&!force)return;$('#wn').value=w.n;$('#wc').value=w.c;$('#wsid').value=w.sid||'';$('#welcome').hidden=false;setTimeout(()=>$('#wn').focus(),50)}
+function welcome(force){if(window.TEACH)return;const w=who();if(w.n&&w.c&&!force)return;$('#wn').value=w.n;$('#wc').value=w.c;$('#wsid').value=w.sid||'';$('#welcome').hidden=false;setTimeout(()=>$('#wn').focus(),50)}
 $('#wf').onsubmit=e=>{e.preventDefault();const n=$('#wn').value.trim(),c=$('#wc').value.trim().toUpperCase();if(!n||!c)return toast('Em hãy điền đủ họ tên và lớp nhé!');LS.set('ai_name',n);LS.set('ai_cls',c);{const sd=$('#wsid').value.trim().toUpperCase().replace(/\s+/g,'');if(sd&&!/^[A-Z0-9]+-\d{1,3}$/.test(sd))return toast('Mã số có dạng lớp-số, VD: 5A1-07. Em xem lại thẻ nhé!');LS.set('ai_sid',sd);if(sd){const sc=sd.split('-')[0];if(sc!==c.replace(/[^A-Z0-9]/g,'')){LS.set('ai_cls',sc);setTimeout(()=>toast('Mã số '+sd+' thuộc lớp '+sc+' nên Art Island ghi lớp của em là '+sc+'.'),2400)}}}K.name=n;$('#welcome').hidden=true;rWho();toast('Chào '+n+'! Cùng khám phá quần đảo nào 🏝️')};
 $('#whoBtn').onclick=()=>welcome(true);
 $('#wclose').onclick=()=>{const w=who();if(!w.n||!w.c)return toast('Em hãy điền họ tên và lớp trước nhé!');$('#welcome').hidden=true};
@@ -2573,7 +2577,7 @@ function gg4(){DC=DC1();{const o=$('#iSt');if(o)o.innerHTML=''}const A=d1arts(),
   $('#ggBody').innerHTML=`<div class="card" style="padding:16px"><h3 style="margin-top:0">🗣️ Kể về sản phẩm của em <small>(SGK tr.10)</small></h3>
     ${[['Chỗ nào trong bài em làm nổi bật nhất? Em làm thế nào?','VD: Chiếc diều – em tô màu đỏ thật tươi và vẽ to hơn các hình khác.'],['Em sắp xếp các hình trong bài thế nào?','VD: Em vẽ một hình nhiều lần, hoặc đặt cái to cạnh cái nhỏ, hoặc hai bên tranh đều nhau.'],['Em thích sản phẩm nào nhất (của em hoặc của bạn)? Vì sao?','']].map(([q,ph],i)=>`<label style="display:block;margin:8px 0"><b>${i+1}. ${q}</b><textarea data-sh="${i}" rows="2" placeholder="${ph}">${esc(d1.share[i])}</textarea></label>`).join('')}
     ${hint('Em hãy giới thiệu bài với bố mẹ, ông bà: chỉ vào chỗ nổi bật nhất và kể vì sao em chọn nó.')}</div>
-   ${decoCardHTML(A,art,D,groups)}<div class="card" style="padding:16px;margin-top:12px"><h3 style="margin-top:0">📤 Nộp bài cho thầy cô</h3>
+   ${decoCardHTML(A,art,D,groups)}<div class="card nopc" style="padding:16px;margin-top:12px"><h3 style="margin-top:0">📤 Nộp bài cho thầy cô</h3>
     ${art&&!canSub(art)?`<p class="mut">🖥️ Bài em đang chọn được làm trên máy nên chỉ lưu trong Kho của em, không nộp lên thầy cô. Muốn nộp, em làm bài bằng giấy, màu hoặc vật liệu thật rồi bấm nút 📷 chụp ảnh ở phía trên.</p>`:art?`<div class="row"><img src="${art.img}" alt="" style="width:120px;border-radius:10px;border:3px solid #fff"><div><b>${esc(art.title||'Bài của em')}</b><br><small class="mut">Bài nộp gồm: ảnh sản phẩm, chỗ em làm nổi bật, phần tự kiểm tra và lời em kể.</small></div></div><button class="cta" id="sub1" style="margin-top:10px">📤 Nộp bài cho thầy cô</button>${art.sub?`<p class="copy">✔ Em đã mở trang nộp bài lúc ${esc(art.sub)}.</p>`:''}`:'<p class="mut">Chưa có sản phẩm để nộp.</p>'}</div>`;
   dRender();decoBind(gg4);
   $$('[data-sh]').forEach(t=>t.onchange=()=>{d1.share[+t.dataset.sh]=t.value.slice(0,300);d1save()});
@@ -4263,7 +4267,7 @@ $('#eq-bClose').onclick=()=>eqClose();
 <script>
 /* nút vào Ếch qua sông: ở biểu ngữ mỗi đảo (sau khi xong Giàn giáo 1) và Sân ôn tập trên bản đồ */
 (function(){
- const done1=k=>{try{return k===0?!!(d1&&d1.done&&d1.done[0]):!!(ST[k]&&ST[k][0])}catch(e){return false}};
+ const done1=k=>{if(window.TEACH)return true;try{return k===0?!!(d1&&d1.done&&d1.done[0]):!!(ST[k]&&ST[k][0])}catch(e){return false}};
  function addBtn(host,k){const b=document.querySelector(host+' .ibanner');if(!b||b.querySelector('.eqgo'))return;const ok=done1(k);
   b.insertAdjacentHTML('beforeend',`<button type="button" class="btn pri eqgo ${ok?'':'lk'}" title="${ok?'Ôn lại chủ đề bằng trò chơi':'Mở sau khi em xong Giàn giáo 1'}">🐸 Ếch qua sông · Ôn tập${ok?'':' 🔒'}</button>`);
   b.querySelector('.eqgo').onclick=()=>{if(!done1(k)){toast('Em hoàn thành Giàn giáo 1 “Khám phá” rồi chơi ôn tập nhé!');return}eqOpen(k)}}
