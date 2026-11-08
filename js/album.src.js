@@ -5,16 +5,16 @@
    Chỉ lưu trên máy em (localStorage), không ghi dữ liệu nghiên cứu. */
 (function(){
 const AP=[
- {k:'Chấm màu',pk:['#38b6ff','#1d6fa5'],m:{t:'Chiều Chủ nhật trên đảo La Grande Jatte',img:'img/82691e49a3.jpg',r:1.49},s:{t:'Rạp xiếc',img:'img/b6347587cc.jpg'}},
- {k:'Hình tượng anh hùng',pk:['#ef5b4c','#9c2a1f'],m:{t:'Nữ thần Tự do dẫn dắt nhân dân',img:'img/6ae33e0dbb.jpg',r:1.25},s:{t:'Chi tiết: lá cờ',img:'img/6ae33e0dbb.jpg',zoom:[280,48,18]}},
- {k:'Khoảnh khắc mẹ con',pk:['#ff8fb8','#b93f6d'],m:{t:'Bữa sáng trên giường',img:'img/bae66f7462.jpg',r:1.24},s:{t:'Tắm cho bé',img:'img/6ec091d30f.jpg'}},
+ {k:'Sơn mài',pk:['#c0392b','#6b1a12'],m:{t:'Vườn xuân Trung Nam Bắc',img:'img/ngt_vuonxuan_c.jpg',r:1.59},s:{t:'Bình phong',img:'img/ngt_binhphong_c.jpg'}},
+ {k:'Hình tượng anh hùng',pk:['#e0a33a','#8a4a12'],m:{t:'Gióng',img:'img/ntn_giong.jpg',r:1.35},s:{t:'Múa cổ',img:'img/ntn_muaco.jpg'}},
+ {k:'Khoảnh khắc gia đình',pk:['#f3a98a','#b0603f'],m:{t:'Hai thiếu nữ và em bé',img:'img/tnv_haithieunu.jpg',r:.75},s:{t:'Thiếu nữ bên hoa huệ',img:'img/tnv_hoahue.jpg'}},
  {k:'Trò chơi của trẻ em',pk:['#7cc35a','#3c7a24'],m:{t:'Trò chơi của trẻ em',img:'img/e81872464c.jpg',r:1.38},s:{t:'Chi tiết: vòng tròn trò chơi',img:'img/e81872464c.jpg',zoom:[320,30,72]}},
  {k:'Người lao động',pk:['#e2a64a','#8a5a12'],m:{t:'Những người mót lúa',img:'img/317644d40a.jpg',r:1.34},s:{t:'Cầu nguyện buổi chiều',img:'img/77aebc7764.jpg'}},
  {k:'Ánh sáng theo thời điểm',pk:['#4fa3c7','#e46a2e'],m:{t:'Ấn tượng, mặt trời mọc',img:'img/00c0166fac.jpg',r:1.29},s:{t:'Đống rơm',img:'img/2f995afaab.jpg'}},
  {k:'Hình ảnh biểu tượng',pk:['#2f6db5','#14335c'],m:{t:'Sóng lừng ngoài khơi Kanagawa',img:'img/9f0f63f360.jpg',r:1.49},s:{t:'Gió nam trời quang (Phú Sĩ đỏ)',img:'img/353662883a.jpg'}},
  {k:'Áp phích',pk:['#c79bd8','#6b3d86'],m:{t:'Bốn mùa',img:'img/9fd7031ce0.jpg',r:2.0},s:{t:'Áp phích “Gismonda”',img:'img/210d195897.jpg'}}
 ];
-const KEYS=['seurat','delacroix','cassatt','bruegel','millet','monet','hokusai','mucha'];
+const KEYS=['giatri','tunghiem','ngocvan','bruegel','millet','monet','hokusai','mucha'];
 const PER=6,PACK=3,TOTAL=AP.length*PER,LSK='ai_album';
 const RAR=i=>i===5?'gold':i===4?'rare':'';
 const RAR_T={gold:'★ Kiệt tác',rare:'◆ Hiếm','':'Thường'};
@@ -172,6 +172,9 @@ const stl=document.createElement('style');stl.textContent=css;document.head.appe
 
 /* ---------- charm hoạ sĩ (mở khoá khi hoàn thành trang) ---------- */
 const CHARM={
+ hs_giatri:'<rect x="-18" y="-18" width="36" height="36" rx="3"/><g fill="#fff">'+[[-8,6],[0,10],[8,4],[-4,-2],[10,12],[-12,12]].map(c=>`<circle cx="${c[0]}" cy="${c[1]}" r="2.6"/>`).join('')+'</g>',
+ hs_tunghiem:'<path d="M-20 18 L-8 -4 L-14 -10 L2 -20 L8 -8 L18 -22 L22 -18 L14 -4 L22 8 L8 12 L12 22 L4 22 L0 14 L-10 18Z"/>',
+ hs_ngocvan:'<g>'+[0,1,2,3,4,5].map(i=>`<ellipse cx="0" cy="-11" rx="5" ry="11" transform="rotate(${i*60})"/>`).join('')+'<circle r="5" fill="#fff"/></g>',
  hs_seurat:'<g>'+[[-12,-10,6],[2,-14,5],[14,-6,6],[-6,2,5],[8,6,6],[-14,12,4],[2,16,5],[16,14,4],[-2,-2,3]].map(c=>`<circle cx="${c[0]}" cy="${c[1]}" r="${c[2]}"/>`).join('')+'</g>',
  hs_delacroix:'<path d="M-16 22 L-16 -22 L-12 -22 L-12 22Z M-12 -20 C0 -26 8 -12 20 -18 L20 2 C8 8 0 -6 -12 0Z"/>',
  hs_cassatt:'<path d="M-6 16 C-26 2 -18 -18 -6 -8 C6 -18 14 2 -6 16Z"/><path d="M10 18 C-2 10 2 -2 10 4 C18 -2 22 10 10 18Z" opacity=".7"/>',
@@ -181,7 +184,7 @@ const CHARM={
  hs_hokusai:'<path d="M-22 18 C-22 -2 -10 -20 8 -20 C20 -20 24 -10 18 -4 C14 -12 4 -12 2 -4 C0 4 8 6 12 2 C10 12 -2 14 -6 6 C-10 12 -6 18 4 18Z"/>',
  hs_mucha:'<g>'+[...Array(12).keys()].map(i=>`<ellipse cx="0" cy="-16" rx="3.5" ry="6" transform="rotate(${i*30})"/>`).join('')+'<circle r="8"/></g>'
 };
-const CHN={hs_seurat:'Chấm màu (Seurat)',hs_delacroix:'Lá cờ (Delacroix)',hs_cassatt:'Mẹ con (Cassatt)',hs_bruegel:'Con quay (Bruegel)',hs_millet:'Bó lúa (Millet)',hs_monet:'Mặt trời mọc (Monet)',hs_hokusai:'Con sóng (Hokusai)',hs_mucha:'Vòng hoa (Mucha)'};
+const CHN={hs_giatri:'Vỏ trứng (Nguyễn Gia Trí)',hs_tunghiem:'Ngựa Gióng (Nguyễn Tư Nghiêm)',hs_ngocvan:'Hoa huệ (Tô Ngọc Vân)',hs_seurat:'Chấm màu (Seurat)',hs_delacroix:'Lá cờ (Delacroix)',hs_cassatt:'Mẹ con (Cassatt)',hs_bruegel:'Con quay (Bruegel)',hs_millet:'Bó lúa (Millet)',hs_monet:'Mặt trời mọc (Monet)',hs_hokusai:'Con sóng (Hokusai)',hs_mucha:'Vòng hoa (Mucha)'};
 
 /* ---------- âm thanh nhỏ ---------- */
 let AC=null;
